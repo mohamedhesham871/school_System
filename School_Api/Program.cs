@@ -1,4 +1,7 @@
 
+using Microsoft.EntityFrameworkCore;
+using Persistence.Contexts;
+
 namespace School_Api
 {
     public class Program
@@ -14,6 +17,8 @@ namespace School_Api
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            builder.Services.AddDbContext<SchoolDbContexts>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolDbConnection")));
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
