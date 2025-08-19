@@ -1,0 +1,56 @@
+[
+  {
+    "ID": 1,
+    "Description": "Primary Grade One",
+    "GradeCode": "GRD-001",
+    "GradeName": "Grade 1",
+    "AcademicYear": "2024-2025",
+    "CreatedAt": "2024-09-01T08:30:00",
+    "UpdatedAt": "2025-01-15T10:45:00"
+  },
+  {
+    "ID": 2,
+    "Description": "Primary Grade Two",
+    "GradeCode": "GRD-002",
+    "GradeName": "Grade 2",
+    "AcademicYear": "2024-2025",
+    "CreatedAt": "2024-09-01T08:35:00",
+    "UpdatedAt": "2025-01-16T09:20:00"
+  },
+  {
+    "ID": 3,
+    "Description": "Primary Grade Three",
+    "GradeCode": "GRD-003",
+    "GradeName": "Grade 3",
+    "AcademicYear": "2024-2025",
+    "CreatedAt": "2024-09-01T08:40:00",
+    "UpdatedAt": "2025-01-17T11:05:00"
+  },
+  {
+    "ID": 4,
+    "Description": "Primary Grade Four",
+    "GradeCode": "GRD-004",
+    "GradeName": "Grade 4",
+    "AcademicYear": "2024-2025",
+    "CreatedAt": "2024-09-01T08:45:00",
+    "UpdatedAt": "2025-01-18T14:10:00"
+  },
+  {
+    "ID": 5,
+    "Description": "Primary Grade Five",
+    "GradeCode": "GRD-005",
+    "GradeName": "Grade 5",
+    "AcademicYear": "2024-2025",
+    "CreatedAt": "2024-09-01T08:50:00",
+    "UpdatedAt": "2025-01-19T15:30:00"
+  },
+  {
+    "ID": 6,
+    "Description": "Primary Grade Six",
+    "GradeCode": "GRD-006",
+    "GradeName": "Grade 6",
+    "AcademicYear": "2024-2025",
+    "CreatedAt": "2024-09-01T08:55:00",
+    "UpdatedAt": "2025-01-20T16:45:00"
+  }
+]

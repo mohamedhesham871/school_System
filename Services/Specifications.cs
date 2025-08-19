@@ -55,6 +55,6 @@ namespace Services
             IsPagingEnabled = true;
             Skip = (IndexPage-1) * PageSize;
             Take = PageSize;
-        }S
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Domain.Models.User;
+﻿using Domain.Models;
+using Domain.Models.User;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -22,6 +23,7 @@ namespace Persistence.Contexts
 
         public DbSet<Students> Students { get; set; } = null!;
         public DbSet<Teacher> Teachers { get; set; } = null!;
+        public DbSet<Grade> Grades { get; set; } = null!;
 
     }
 }
