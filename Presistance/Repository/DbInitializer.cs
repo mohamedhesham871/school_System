@@ -27,7 +27,8 @@ namespace Persistence.Repository
             {
                 if(! await  context.Grades.AnyAsync())
                 {
-                    var data = await File.ReadAllTextAsync(@"..\interface\Presistance\SeedingData\Seeding_Grade.Json");
+                   // var data = await File.ReadAllTextAsync(@"..\interface\Presistance\SeedingData\Seeding_Grade.Json");
+                    var data = await File.ReadAllTextAsync(@"..\Presistance\SeedingData\Seeding_Grade.Json");
                     var grades =JsonSerializer.Deserialize<List<Grade>>(data);
                     if (grades != null && grades.Count > 0)
                     {
