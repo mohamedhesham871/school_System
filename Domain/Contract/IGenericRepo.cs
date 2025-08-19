@@ -14,9 +14,9 @@ namespace Domain.Contract
         Task<IEnumerable<TEntiy>> GetByConditionAsync(ISpecifications<TEntiy> Spec);
         Task<TEntiy>GetByIdAsyncSpecifc( ISpecifications<TEntiy> Spec);
 
-        Task AddAsync(TEntiy entity);
-        Task UpdateAsync(TEntiy entity);
-        Task DeleteAsync(TEntiy entiy);
+        void AddAsync(TEntiy entity);
+        void UpdateAsync(TEntiy entity);
+        void DeleteAsync(TEntiy entiy);
 
     }
 }
