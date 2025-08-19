@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Contract
 {
-    public  interface IGenricRepo<TEntiy,TKey> where TEntiy : class
+    public  interface IGenericRepo<TEntiy,TKey> where TEntiy : class
     {
         Task<TEntiy> GetByIdAsync(TKey id);
         Task<IEnumerable<TEntiy>> GetAllAsync();
