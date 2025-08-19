@@ -17,10 +17,10 @@ namespace Persistence.Repository
             contexts.Set<TEntity>().AddAsync(entity);
         }
 
-        public void DeleteAsync(TEntity entiy)
+        public void DeleteAsync(TEntity entity)
         {
             
-            contexts.Set<TEntity>().Remove(entiy);
+            contexts.Set<TEntity>().Remove(entity);
         }
         public void  UpdateAsync(TEntity entity)
         {
@@ -39,12 +39,14 @@ namespace Persistence.Repository
         //making Dynamic Query
         public async Task<IEnumerable<TEntity>> GetByConditionAsync(ISpecifications<TEntity> Spec)
         {
-            var SpecificQuery = contex
+            var SpecificQuery =   await SpecificationEvaluator.CreateQuery(contexts.Set<TEntity>(), Spec).ToListAsync();
+            return SpecificQuery;
         }
 
-        public Task<TEntity> GetByIdAsyncSpecifc(ISpecifications<TEntity> Spec)
+        public async Task<TEntity> GetByIdAsyncSpecific(ISpecifications<TEntity> Spec)
         {
-            throw new NotImplementedException();
+            var res = await SpecificationEvaluator.CreateQuery(contexts.Set<TEntity>(), Spec).FirstOrDefaultAsync();
+            return res!;
         }
 
        

@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace Domain.Contract
 {
-    public  interface IGenericRepo<TEntiy,TKey> where TEntiy : class
+    public  interface IGenericRepo<TEntity,TKey> where TEntity : class
     {
-        Task<TEntiy> GetByIdAsync(TKey id);
-        Task<IEnumerable<TEntiy>> GetAllAsync();
-        //Want to Make Dynaimc Query Later 
-        Task<IEnumerable<TEntiy>> GetByConditionAsync(ISpecifications<TEntiy> Spec);
-        Task<TEntiy>GetByIdAsyncSpecifc( ISpecifications<TEntiy> Spec);
+        Task<TEntity> GetByIdAsync(TKey id);
+        Task<IEnumerable<TEntity>> GetAllAsync();
+        //Want to Make Dynamic Query Later 
+        Task<IEnumerable<TEntity>> GetByConditionAsync(ISpecifications<TEntity> Spec);
+        Task<TEntity> GetByIdAsyncSpecific( ISpecifications<TEntity> Spec);
 
-        void AddAsync(TEntiy entity);
-        void UpdateAsync(TEntiy entity);
-        void DeleteAsync(TEntiy entiy);
+        void AddAsync(TEntity entity);
+        void UpdateAsync(TEntity entity);
+        void DeleteAsync(TEntity entity);
 
     }
 }
