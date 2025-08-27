@@ -12,7 +12,7 @@ namespace Domain.Models.User
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
         public DateOnly DateOfBirth { get; set; }
-        public char Gender { get; set; } //F  Female / M  male 
+        public string Gender { get; set; } = null!;
         public string Address { get; set; } = null!;
         public string? ProfileImage { get; set; } = "images/Default.png";
         public DateTime CreatedAt { get; set; } = DateTime.Now;

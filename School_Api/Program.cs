@@ -1,15 +1,24 @@
-
+using AbstractionServices;
 using Domain.Contract;
+using AutoMapper;
+using Domain.Models.User;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Persistence.Contexts;
 using Persistence.Repository;
+using Services;
+using Services.Profiles;
+using Shared;
+using System.Text;
 
 namespace School_Api
 {
     public class Program
     {
-        public static  void Main(string[] args)
+        public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -19,9 +28,46 @@ namespace School_Api
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+           
+
+            #region Authorize And Authentication
+            var JWTtoken = builder.Configuration.GetSection("JwtOptions").Get<JwtToken>();
+
+            builder.Services.AddAuthentication(options =>
+            {
+
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(Options =>
+                 Options.TokenValidationParameters = new TokenValidationParameters
+                 {
+                     ValidateIssuer = true,
+                     ValidateAudience = true,
+                     ValidateLifetime = true,
+                     ValidateIssuerSigningKey = true,
+
+
+                     ValidIssuer = JWTtoken.Issuer,
+                     ValidAudience = JWTtoken.Audience,
+                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JWTtoken.SecretKey))
+                 });
+
+            #endregion
             #region Register Repositories
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+            builder.Services.AddScoped<IAuthServices, AuthServices>();
+            builder.Services.AddIdentity<AppUsers, IdentityRole>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+            })
+            .AddEntityFrameworkStores<SchoolDbContexts>()
+            .AddDefaultTokenProviders();
+            builder.Services.AddAutoMapper(typeof(UsersProfile).Assembly);
             #endregion
             builder.Services.AddDbContext<SchoolDbContexts>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolDbConnection")));
@@ -39,8 +85,8 @@ namespace School_Api
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 
