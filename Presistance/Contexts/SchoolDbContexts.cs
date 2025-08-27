@@ -24,6 +24,8 @@ namespace Persistence.Contexts
         public DbSet<Students> Students { get; set; } = null!;
         public DbSet<Teacher> Teachers { get; set; } = null!;
         public DbSet<Grade> Grades { get; set; } = null!;
+        public DbSet<Subject> Subjects { get; set; } = null!;
+        public DbSet<Lesson> Lessons { get; set; } = null!;
 
     }
 }
