@@ -9,6 +9,6 @@ namespace Domain.Contract
     public interface IDbInitializer
     {
         Task Initialize();
-
+        Task InitializeRole(Microsoft.AspNetCore.Identity.RoleManager<Microsoft.AspNetCore.Identity.IdentityRole> roleSeeding);
     }
 }

@@ -97,7 +97,10 @@ namespace School_Api
             using (var scope = app.Services.CreateScope())
             {
                 var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+                var RoleSeeding = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+               
                 await dbInitializer.Initialize();
+                await dbInitializer.InitializeRole(RoleSeeding);
             }
         }
     }
