@@ -20,7 +20,7 @@ namespace Presentation.Controller
             return Ok(res);
         }
         [HttpPost("TeacherRegister")]
-        public async Task<IActionResult> Register([FromBody] RegisterTeacherDto registerTeacher)
+        public async Task<IActionResult> Register([FromQuery] RegisterTeacherDto registerTeacher)
         {
             var res = await services.RegisterTeacher(registerTeacher);
             return Ok(res);

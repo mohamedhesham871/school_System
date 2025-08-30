@@ -10,8 +10,8 @@ namespace Domain.Models.User
     {
         public DateTime HiringDate { get; set; }
         public string Specialization { get; set; } = null!;
-        public ICollection<int>? AssignedSubjects { get; set; } = new List<int>(); //
-        public ICollection<int>? AssignedClasses { get; set; } = new List<int>(); //
+        public IList<int>? AssignedSubjects { get; set; } = new List<int>(); //
+        public IList<int>? AssignedClasses { get; set; } = new List<int>(); //
         public string Status { get; set; } = "Active"; // Active, Inactive, Resigned
     }
 }

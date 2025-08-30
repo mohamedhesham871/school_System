@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Persistence.Repository
 {
-    public class DbInitializer(SchoolDbContexts context) : IDbInitializer
+    public class DbInitializer(SchoolDbContexts context,UserManager<AppUsers> user) : IDbInitializer
     {
         public async Task Initialize()
         {
@@ -58,6 +58,41 @@ namespace Persistence.Repository
                     {
                         await roleSeeding.CreateAsync(new IdentityRole(role));
                     }
+                }
+                if (!await context.Teachers.AnyAsync())
+                {
+                    // in this Case Create Two Users
+                    //Can Hide it in appsettings.json
+                    var SuperAdmin = new AppUsers()
+                    {
+                        FirstName = "Omar",
+                        LastName = "Ahmed",
+                        UserName = "Omar_Ahmed",
+                        Email = "SuperAdmin@gmail.com",
+                        Gender ="Male",
+                      //  DateOfBirth = new DateOnly(1995, 5, 23),
+                        Address = "Qena, Egypt",
+                        PhoneNumber = "01004550656"
+                    };
+
+                    var Admin = new AppUsers()
+                    {
+                        FirstName = "Mohamed",
+                        LastName = "hesham",
+                        UserName = "Mohamed_Hesham",
+                        Gender = "Male",
+                    //    DateOfBirth = new DateOnly(1999, 3,20),
+                        Address = "Qena, Egypt",
+                        Email = "Admin@gmail.com",
+                        PhoneNumber = "01005557656"
+                    };
+
+                    await user.CreateAsync(SuperAdmin, "SuperAdmin@123");
+                    await user.CreateAsync(Admin, "Admin@123");
+
+                    //Adding Roles to Users
+                    await user.AddToRoleAsync(SuperAdmin, "Admin");
+                    await user.AddToRoleAsync(Admin, "Admin");
                 }
             }
             catch (Exception ex)

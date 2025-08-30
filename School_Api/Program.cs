@@ -31,6 +31,7 @@ namespace School_Api
            
 
             #region Authorize And Authentication
+            builder.Services.Configure<JwtToken>(builder.Configuration.GetSection("JwtOptions"));
             var JWTtoken = builder.Configuration.GetSection("JwtOptions").Get<JwtToken>();
 
             builder.Services.AddAuthentication(options =>
@@ -67,7 +68,7 @@ namespace School_Api
             })
             .AddEntityFrameworkStores<SchoolDbContexts>()
             .AddDefaultTokenProviders();
-            builder.Services.AddAutoMapper(typeof(UsersProfile).Assembly);
+             builder.Services.AddAutoMapper(typeof(UsersProfile).Assembly);
             #endregion
             builder.Services.AddDbContext<SchoolDbContexts>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolDbConnection")));
