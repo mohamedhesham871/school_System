@@ -30,6 +30,26 @@ namespace School_Api
             builder.Services.AddSwaggerGen();
            
 
+            
+            #region Register Repositories
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+            builder.Services.AddScoped<IAuthServices, AuthServices>();
+            builder.Services.AddIdentity<AppUsers, IdentityRole>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+            })
+            .AddEntityFrameworkStores<SchoolDbContexts>()
+            .AddDefaultTokenProviders();
+             builder.Services.AddAutoMapper(typeof(UsersProfile).Assembly);
+            #endregion
+            builder.Services.AddDbContext<SchoolDbContexts>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolDbConnection")));
+
             #region Authorize And Authentication
             builder.Services.Configure<JwtToken>(builder.Configuration.GetSection("JwtOptions"));
             var JWTtoken = builder.Configuration.GetSection("JwtOptions").Get<JwtToken>();
@@ -52,26 +72,10 @@ namespace School_Api
                      ValidAudience = JWTtoken.Audience,
                      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JWTtoken.SecretKey))
                  });
+            builder.Services.AddAuthorization();//VIP to Authorize work
+
 
             #endregion
-            #region Register Repositories
-            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<IDbInitializer, DbInitializer>();
-            builder.Services.AddScoped<IAuthServices, AuthServices>();
-            builder.Services.AddIdentity<AppUsers, IdentityRole>(options =>
-            {
-                options.User.RequireUniqueEmail = true;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequiredLength = 6;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = true;
-            })
-            .AddEntityFrameworkStores<SchoolDbContexts>()
-            .AddDefaultTokenProviders();
-             builder.Services.AddAutoMapper(typeof(UsersProfile).Assembly);
-            #endregion
-            builder.Services.AddDbContext<SchoolDbContexts>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolDbConnection")));
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -83,10 +87,19 @@ namespace School_Api
             #region Seeding Data
              SeedingData(app).Wait();
             #endregion
+           
 
             app.UseHttpsRedirection();
-
+            app.UseStaticFiles();
             app.UseAuthentication();
+            // Add this right after app.UseAuthentication();
+            app.Use(async (context, next) =>
+            {
+                Console.WriteLine($"Request path: {context.Request.Path}");
+                Console.WriteLine($"Auth header: {context.Request.Headers.Authorization}");
+                await next();
+            });
+
             app.UseAuthorization();
 
             app.MapControllers();

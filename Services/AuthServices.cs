@@ -129,6 +129,14 @@ namespace Services
                 Token = await GenrateToken(teacher)
             };
         }
+    
+        public async Task<UserProfileDto> UserProfile(string Email)
+        {
+            var user =await  _user.FindByEmailAsync(Email);
+            if (user is null) throw new NotFoundException($"user with Email {Email} Not Found Please Enter Valid email");
+            var userProfile = mapper.Map<UserProfileDto>(user);
+            return userProfile;
+        }
 
         public async Task<string> GenrateToken(AppUsers user)
         {
@@ -157,6 +165,8 @@ namespace Services
 
          
         }
+
+        
     }
    
 }

@@ -38,12 +38,20 @@ namespace Services.Profiles
             ForMember(dest => dest.Status, src => src.MapFrom(opt => Enum.Parse<TeacherState>(opt.Status)))
            .ForMember(dest => dest.gender, src => src.MapFrom(opt => Enum.Parse<Gender>(opt.Gender)));
 
+            /*5*/
+
+            CreateMap<Teacher, UserProfileDto>()
+               .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom<PictureUrlResolver>());
+            /*6*/
+            CreateMap<Students, UserProfileDto>()
+               .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom<PictureUrlResolver>());
         }
 
     }
-    public class PictureUrlResolver(IConfiguration config) : IValueResolver<Students, RegisterStudentDto, string>
+    //For Resolving the Full URL of the Picture
+    public class PictureUrlResolver(IConfiguration config) : IValueResolver<AppUsers, UserProfileDto, string>
     {
-        public string Resolve(Students source, RegisterStudentDto destination, string destMember, ResolutionContext context)
+        public string Resolve(AppUsers source, UserProfileDto destination, string destMember, ResolutionContext context)
         {
             var baseUrl = config["BaseUrl"] ?? string.Empty;
 
@@ -56,6 +64,7 @@ namespace Services.Profiles
 
             // I make it to Avoid Double Slash in the URL
             return $"{baseUrl.TrimEnd('/')}/{source.ProfileImage.TrimStart('/')}";
+
         }
     }
 }
