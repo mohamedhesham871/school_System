@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence.Contexts;
 
@@ -11,9 +12,11 @@ using Persistence.Contexts;
 namespace Persistence.Data.Migrations
 {
     [DbContext(typeof(SchoolDbContexts))]
-    partial class SchoolDbContextsModelSnapshot : ModelSnapshot
+    [Migration("20250918073037_Add Relation with Teacher and Class M to M ")]
+    partial class AddRelationwithTeacherandClassMtoM
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -471,8 +474,7 @@ namespace Persistence.Data.Migrations
                 {
                     b.HasOne("Domain.Models.User.Teacher", "Teacher")
                         .WithMany("Subjects")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("TeacherId");
 
                     b.Navigation("Teacher");
                 });

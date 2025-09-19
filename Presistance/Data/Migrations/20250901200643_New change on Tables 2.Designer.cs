@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence.Contexts;
 
@@ -11,9 +12,11 @@ using Persistence.Contexts;
 namespace Persistence.Data.Migrations
 {
     [DbContext(typeof(SchoolDbContexts))]
-    partial class SchoolDbContextsModelSnapshot : ModelSnapshot
+    [Migration("20250901200643_New change on Tables 2")]
+    partial class NewchangeonTables2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,34 +90,6 @@ namespace Persistence.Data.Migrations
                     b.ToTable("Lessons");
                 });
 
-            modelBuilder.Entity("Domain.Models.StudentClass", b =>
-                {
-                    b.Property<int>("ClassID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClassID"));
-
-                    b.Property<string>("ClassName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreateAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("GradeID")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdateAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ClassID");
-
-                    b.HasIndex("GradeID");
-
-                    b.ToTable("StudentClasses");
-                });
-
             modelBuilder.Entity("Domain.Models.Subject", b =>
                 {
                     b.Property<int>("SubjectID")
@@ -137,32 +112,15 @@ namespace Persistence.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("TeacherId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("TeacherID")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("SubjectID");
 
-                    b.HasIndex("TeacherId");
-
                     b.ToTable("Subjects");
-                });
-
-            modelBuilder.Entity("Domain.Models.TeacherClass", b =>
-                {
-                    b.Property<string>("TeacherId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("ClassID")
-                        .HasColumnType("int");
-
-                    b.HasKey("TeacherId", "ClassID");
-
-                    b.HasIndex("ClassID");
-
-                    b.ToTable("TeacherClass", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Models.User.AppUsers", b =>
@@ -436,6 +394,12 @@ namespace Persistence.Data.Migrations
                 {
                     b.HasBaseType("Domain.Models.User.AppUsers");
 
+                    b.Property<string>("AssignedClasses")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AssignedSubjects")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("HiringDate")
                         .HasColumnType("date");
 
@@ -454,46 +418,6 @@ namespace Persistence.Data.Migrations
                         });
 
                     b.HasDiscriminator().HasValue("Teacher");
-                });
-
-            modelBuilder.Entity("Domain.Models.StudentClass", b =>
-                {
-                    b.HasOne("Domain.Models.Grade", "Grade")
-                        .WithMany()
-                        .HasForeignKey("GradeID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Grade");
-                });
-
-            modelBuilder.Entity("Domain.Models.Subject", b =>
-                {
-                    b.HasOne("Domain.Models.User.Teacher", "Teacher")
-                        .WithMany("Subjects")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("Teacher");
-                });
-
-            modelBuilder.Entity("Domain.Models.TeacherClass", b =>
-                {
-                    b.HasOne("Domain.Models.StudentClass", "Class")
-                        .WithMany("TeacherClasses")
-                        .HasForeignKey("ClassID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Models.User.Teacher", "Teacher")
-                        .WithMany("TeacherClasses")
-                        .HasForeignKey("TeacherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Class");
-
-                    b.Navigation("Teacher");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -545,18 +469,6 @@ namespace Persistence.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Models.StudentClass", b =>
-                {
-                    b.Navigation("TeacherClasses");
-                });
-
-            modelBuilder.Entity("Domain.Models.User.Teacher", b =>
-                {
-                    b.Navigation("Subjects");
-
-                    b.Navigation("TeacherClasses");
                 });
 #pragma warning restore 612, 618
         }

@@ -11,7 +11,6 @@ namespace AbstractionServices
     {
         Task<UserResultDto> Login(LoginUserDto loginUser);
         Task<UserResultDto> RegisterStudent(RegisterStudentDto registerUser);
-        Task<UserResultDto> RegisterTeacher(RegisterTeacherDto registerUser);
         Task<UserProfileDto> UserProfile(string Email);
     }
 }

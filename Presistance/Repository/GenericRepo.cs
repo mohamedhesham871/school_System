@@ -2,6 +2,7 @@
 using Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Contexts;
+using Services.SpecificationsFile;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,6 +50,14 @@ namespace Persistence.Repository
             return res!;
         }
 
-       
+        public async Task<int> CountAsync(ISpecifications<TEntity> Spec)
+        {
+            return  await SpecificationEvaluator.CreateQuery(contexts.Set<TEntity>(), Spec).CountAsync();
+        }
+
+        public async Task<bool> ExistsAsync(ISpecifications<TEntity> spec)
+        {
+            return await SpecificationEvaluator.CreateQuery(contexts.Set<TEntity>(), spec).AnyAsync();
+        }
     }
 }

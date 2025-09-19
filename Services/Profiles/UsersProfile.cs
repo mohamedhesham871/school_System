@@ -28,23 +28,29 @@ namespace Services.Profiles
 
 
             /*3*/
-            CreateMap<RegisterTeacherDto, Teacher>().
+            CreateMap<NewTeacherDto, Teacher>().
            ForMember(dest => dest.Status, src => src.MapFrom(opt => opt.Status.ToString()))
           .ForMember(dest => dest.Gender, src => src.MapFrom(opt => opt.gender.ToString()));
 
 
             /*4*/
-            CreateMap<Teacher, RegisterTeacherDto>().
+            CreateMap<Teacher, NewTeacherDto>().
             ForMember(dest => dest.Status, src => src.MapFrom(opt => Enum.Parse<TeacherState>(opt.Status)))
            .ForMember(dest => dest.gender, src => src.MapFrom(opt => Enum.Parse<Gender>(opt.Gender)));
 
             /*5*/
-
             CreateMap<Teacher, UserProfileDto>()
                .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom<PictureUrlResolver>());
             /*6*/
             CreateMap<Students, UserProfileDto>()
                .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom<PictureUrlResolver>());
+            /*7*/
+            CreateMap<UpdateTeacherDto, Teacher>()
+           .ForMember(dest => dest.Status, src => src.MapFrom(opt => opt.Status.ToString()));
+
+            CreateMap<Teacher, TeacherResultDto>().
+                ForMember(dest => dest.ProfileImage, src => src.MapFrom<PictureUrlResolverResutlTeacher>());
+
         }
 
     }
@@ -52,6 +58,25 @@ namespace Services.Profiles
     public class PictureUrlResolver(IConfiguration config) : IValueResolver<AppUsers, UserProfileDto, string>
     {
         public string Resolve(AppUsers source, UserProfileDto destination, string destMember, ResolutionContext context)
+        {
+            var baseUrl = config["BaseUrl"] ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(baseUrl) || source.ProfileImage == null || !source.ProfileImage.Any())
+                return string.Empty;
+
+
+            if (string.IsNullOrWhiteSpace(source.ProfileImage))
+                return $"{baseUrl}/images/default-profile.png";
+
+            // I make it to Avoid Double Slash in the URL
+            return $"{baseUrl.TrimEnd('/')}/{source.ProfileImage.TrimStart('/')}";
+
+        }
+    }
+    //For TEACHER Result
+    public class PictureUrlResolverResutlTeacher(IConfiguration config) : IValueResolver<Teacher, TeacherResultDto, string>
+    {
+        public string Resolve(Teacher source, TeacherResultDto destination, string destMember, ResolutionContext context)
         {
             var baseUrl = config["BaseUrl"] ?? string.Empty;
 

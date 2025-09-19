@@ -35,6 +35,11 @@ namespace School_Api
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             builder.Services.AddScoped<IAuthServices, AuthServices>();
+            builder.Services.AddScoped<ITeacherService, TeacherService>();
+            builder.Services.AddAutoMapper(typeof(UsersProfile).Assembly);
+            #endregion
+
+            #region Identity services
             builder.Services.AddIdentity<AppUsers, IdentityRole>(options =>
             {
                 options.User.RequireUniqueEmail = true;
@@ -43,9 +48,8 @@ namespace School_Api
                 options.Password.RequireLowercase = true;
                 options.Password.RequireUppercase = true;
             })
-            .AddEntityFrameworkStores<SchoolDbContexts>()
-            .AddDefaultTokenProviders();
-             builder.Services.AddAutoMapper(typeof(UsersProfile).Assembly);
+           .AddEntityFrameworkStores<SchoolDbContexts>()
+           .AddDefaultTokenProviders();
             #endregion
             builder.Services.AddDbContext<SchoolDbContexts>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolDbConnection")));
@@ -92,13 +96,7 @@ namespace School_Api
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseAuthentication();
-            // Add this right after app.UseAuthentication();
-            app.Use(async (context, next) =>
-            {
-                Console.WriteLine($"Request path: {context.Request.Path}");
-                Console.WriteLine($"Auth header: {context.Request.Headers.Authorization}");
-                await next();
-            });
+           
 
             app.UseAuthorization();
 

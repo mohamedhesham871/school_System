@@ -18,5 +18,9 @@ namespace Domain.Contract
         void UpdateAsync(TEntity entity);
         void DeleteAsync(TEntity entity);
 
+        //Counting 
+        Task<int> CountAsync(ISpecifications<TEntity> Spec);
+
+        Task<bool> ExistsAsync(ISpecifications<TEntity> spec);
     }
 }

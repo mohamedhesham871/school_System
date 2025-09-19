@@ -15,7 +15,7 @@ namespace Shared.IdentityDtos
         public string UserName { get; set; } = null!;
         public string Email { get; set; } = null!;
        
-        public DateOnly DateOfBirth { get; set; }
+        public DateTime DateOfBirth { get; set; }
         public string gender { get; set; } 
         public string Address { get; set; } = null!;
         public string ProfileImage { get; set; }

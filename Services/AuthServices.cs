@@ -84,51 +84,7 @@ namespace Services
 
         }
 
-        public async  Task<UserResultDto> RegisterTeacher(RegisterTeacherDto registerUser)
-        {
-            // Check if user already exist
-            var user = await _user.FindByEmailAsync(registerUser.Email);
-            if (user is not null) throw new BadRequestException($"user with Email {registerUser.Email} Already Exist Please Enter Another email");
-
-            //Check if Password is match with Confirm Password
-            if (registerUser.Password != registerUser.ConfirmPassword) throw new BadRequestException("Password and Confirm Password do not match");
-
-            //chechk if profile image not null
-            var UserPictureProfile = "images/Default_Icone.png";
-
-            if (registerUser.ProfileImage != null && registerUser.ProfileImage.Length > 0)
-            {
-                var UploadImage = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
-                var fileName = $"{Guid.NewGuid()}_{registerUser.ProfileImage.FileName}";
-                var filePath = Path.Combine(UploadImage, fileName);
-
-                using (var Stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await registerUser.ProfileImage.CopyToAsync(Stream);
-                }
-                UserPictureProfile = $"/images/{fileName}"; // Set the new profile picture path
-            }
-
-            // Add New User
-            var teacher = mapper.Map<Teacher>(registerUser);
-            teacher.ProfileImage = UserPictureProfile;
-
-            var result = await _user.CreateAsync(teacher, registerUser.Password);
-            if (!result.Succeeded)
-            {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new BadRequestException($"Failed to create user: {errors}");
-            }
-
-            // Assign Role to User
-            await _user.AddToRoleAsync(teacher, "Teacher");
-            return new UserResultDto
-            {
-                UserEmail = teacher.Email!,
-                UserName = teacher.UserName!,
-                Token = await GenrateToken(teacher)
-            };
-        }
+       
     
         public async Task<UserProfileDto> UserProfile(string Email)
         {
@@ -137,6 +93,7 @@ namespace Services
             var userProfile = mapper.Map<UserProfileDto>(user);
             return userProfile;
         }
+
 
         public async Task<string> GenrateToken(AppUsers user)
         {

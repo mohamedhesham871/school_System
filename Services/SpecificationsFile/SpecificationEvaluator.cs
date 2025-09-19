@@ -6,11 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Persistence
+namespace Services.SpecificationsFile
 {
     public  class SpecificationEvaluator
     {
-        public static IQueryable<T> CreateQuery<T>(IQueryable<T>InputQuery,ISpecifications<T> specifications) where T : class
+
+        public static IQueryable<T> CreateQuery<T>(IQueryable<T> InputQuery, ISpecifications<T> specifications) where T : class
         {
             //1-
             if (specifications.Criteria is not null)
@@ -19,14 +20,14 @@ namespace Persistence
             }
             //2
             //Can Use Aggregate Function or Using Loop for Include
-            InputQuery =specifications.Includes.Aggregate(InputQuery ,(current, include) => current.Include(include));
+            InputQuery = specifications.Includes.Aggregate(InputQuery, (current, include) => current.Include(include));
             //3
             if (specifications.OrderBy is not null)
             {
                 InputQuery.OrderBy(specifications.OrderBy);
             }
             //4
-            if(specifications.OrderByDescending is not null)
+            if (specifications.OrderByDescending is not null)
             {
                 InputQuery.OrderByDescending(specifications.OrderByDescending);
             }
