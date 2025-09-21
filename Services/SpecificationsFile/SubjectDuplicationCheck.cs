@@ -11,7 +11,7 @@ namespace Services.SpecificationsFile
     {
         public SubjectDuplicationCheck(string SCode):base(s=>s.SubjectCode==SCode)
         {
-            
+        
         }
     }
 }

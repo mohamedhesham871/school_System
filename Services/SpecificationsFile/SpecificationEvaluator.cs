@@ -16,7 +16,8 @@ namespace Services.SpecificationsFile
             //1-
             if (specifications.Criteria is not null)
             {
-                InputQuery.Where(specifications.Criteria);
+
+                InputQuery = InputQuery.Where(specifications.Criteria);
             }
             //2
             //Can Use Aggregate Function or Using Loop for Include

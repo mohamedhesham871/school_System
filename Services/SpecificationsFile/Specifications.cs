@@ -20,7 +20,7 @@ namespace Services.SpecificationsFile
             Criteria = criteria;
 
         }
-        public Expression<Func<TEntity, bool>>? Criteria { get; private set; }
+        public Expression<Func<TEntity, bool>>? Criteria { get;  private set; }
 
         public List<Expression<Func<TEntity, object>>> Includes { get; private set; } = [];
 
@@ -32,7 +32,7 @@ namespace Services.SpecificationsFile
 
         public int Skip { get; private set; }
 
-        public bool IsPagingEnabled { get; private set; } = true;
+        public bool IsPagingEnabled { get; private set; } = false;
 
         //Crearte Function For Adding Includes
         public void AddInclude(Expression<Func<TEntity, object>> IncludeExpression)

@@ -25,7 +25,7 @@ namespace Shared.SubjectDtos
             public string? TeacherId { get; set; }
 
             [Required(ErrorMessage = "Grade is required")]
-            public int GradeId { get; set; }
+            public int GradeID { get; set; }
         }
     
 }

@@ -31,7 +31,7 @@ namespace Services
                     throw new BadRequestException("Subject Already Exists Please Enter Another Code");
                 }
                 //check if Grade Exists
-                var grade = await unitOfWork.GetRepository<Grade, int>().GetByIdAsync(subjectDto.GradeId);
+                var grade = await unitOfWork.GetRepository<Grade, int>().GetByIdAsync(subjectDto.GradeID);
                 if (grade is  null) throw new NotFoundException("Grade Not Found ,Please Enter Valid Grade");
                 //check if Teacher Exists if not null
                 if (subjectDto.TeacherId is not null)
@@ -44,7 +44,7 @@ namespace Services
                     SubjectCode = subjectDto.SubjectCode,
                     SubjectName = subjectDto.SubjectName,
                     Description = subjectDto.Description,
-                    GradeID = subjectDto.GradeId,
+                    GradeID = subjectDto.GradeID,
                     TeacherId = subjectDto.TeacherId
 
                 };
@@ -77,7 +77,8 @@ namespace Services
         {
            var Spec = new SubjectSpecificationWithGradeAndLessonAndTeacher(subjectFilteration);
             var subjects = await unitOfWork.GetRepository<Subject, int>().GetByConditionAsync(Spec);
-            var totalCount = await unitOfWork.GetRepository<Subject, int>().CountAsync(Spec);
+            var CountAllSubjects = new SubjectSpecificationCount(subjectFilteration);
+            var totalCount = await unitOfWork.GetRepository<Subject, int>().CountAsync(CountAllSubjects);
             var subjectDtos = subjects.Select(s => new SubjectResponseShortDto
             {
                 SubjectCode = s.SubjectCode,
@@ -96,8 +97,10 @@ namespace Services
         //Get Subject By Id[Code]
         public async Task<SubjectResponseDto> GetSubjectByCodeAsync(string SubjectCode)
         {
-            var subject = await unitOfWork.GetRepository<Subject, int>().GetByIdAsyncSpecific(new SubjectDuplicationCheck(SubjectCode));
-            if(subject is null) throw new NotFoundException($"Subject with code '{SubjectCode}' was not found.");
+            var Spec = new SubjectSpecificationWithGradeAndLessonAndTeacher(SubjectCode);
+
+            var subject = await unitOfWork.GetRepository<Subject, int>().GetByIdAsyncSpecific(Spec);
+            if (subject is null) throw new NotFoundException($"Subject with code '{SubjectCode}' was not found.");
             var subjectDto = new SubjectResponseDto
             {
                 SubjectCode = subject.SubjectCode,
