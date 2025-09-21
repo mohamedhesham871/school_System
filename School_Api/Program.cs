@@ -13,6 +13,7 @@ using Services;
 using Services.Profiles;
 using Shared;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace School_Api
 {
@@ -36,6 +37,7 @@ namespace School_Api
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
             builder.Services.AddScoped<IAuthServices, AuthServices>();
             builder.Services.AddScoped<ITeacherService, TeacherService>();
+            builder.Services.AddScoped<ISubjectServices, SubjectServices>();
             builder.Services.AddAutoMapper(typeof(UsersProfile).Assembly);
             #endregion
 
