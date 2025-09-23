@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence.Contexts;
 
@@ -11,9 +12,11 @@ using Persistence.Contexts;
 namespace Persistence.Data.Migrations
 {
     [DbContext(typeof(SchoolDbContexts))]
-    partial class SchoolDbContextsModelSnapshot : ModelSnapshot
+    [Migration("20250923101155_Create New Table_Quiz_Question_Answers and handle Relation")]
+    partial class CreateNewTable_Quiz_Question_AnswersandhandleRelation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -65,11 +68,6 @@ namespace Persistence.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LessonId"));
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -81,6 +79,11 @@ namespace Persistence.Data.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<string>("LessonCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("MaterialUrl")
                         .HasColumnType("nvarchar(max)");
@@ -103,7 +106,7 @@ namespace Persistence.Data.Migrations
 
                     b.HasKey("LessonId");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("LessonCode")
                         .IsUnique();
 
                     b.HasIndex("SubjectId");
@@ -147,11 +150,6 @@ namespace Persistence.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubjectID"));
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -164,6 +162,11 @@ namespace Persistence.Data.Migrations
 
                     b.Property<int>("GradeID")
                         .HasColumnType("int");
+
+                    b.Property<string>("SubjectCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("SubjectName")
                         .IsRequired()
@@ -180,10 +183,10 @@ namespace Persistence.Data.Migrations
 
                     b.HasKey("SubjectID");
 
-                    b.HasIndex("Code")
-                        .IsUnique();
-
                     b.HasIndex("GradeID");
+
+                    b.HasIndex("SubjectCode")
+                        .IsUnique();
 
                     b.HasIndex("TeacherId");
 
@@ -315,13 +318,13 @@ namespace Persistence.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AnswerCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("AnswerText")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("bit");
@@ -331,7 +334,7 @@ namespace Persistence.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("AnswerCode")
                         .IsUnique();
 
                     b.HasIndex("QuestionId");
@@ -347,10 +350,6 @@ namespace Persistence.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuestionId"));
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -358,6 +357,10 @@ namespace Persistence.Data.Migrations
 
                     b.Property<int?>("Points")
                         .HasColumnType("int");
+
+                    b.Property<string>("QuestionCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("QuestionText")
                         .IsRequired()
@@ -377,7 +380,7 @@ namespace Persistence.Data.Migrations
 
                     b.HasKey("QuestionId");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("QuestionCode")
                         .IsUnique();
 
                     b.HasIndex("QuizId");
@@ -392,10 +395,6 @@ namespace Persistence.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuizId"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -413,6 +412,10 @@ namespace Persistence.Data.Migrations
                     b.Property<int>("LessonId")
                         .HasColumnType("int");
 
+                    b.Property<string>("QuizCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -428,10 +431,10 @@ namespace Persistence.Data.Migrations
 
                     b.HasKey("QuizId");
 
-                    b.HasIndex("Code")
+                    b.HasIndex("LessonId")
                         .IsUnique();
 
-                    b.HasIndex("LessonId")
+                    b.HasIndex("QuizCode")
                         .IsUnique();
 
                     b.ToTable("Quizzes");

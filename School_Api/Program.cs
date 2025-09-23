@@ -38,6 +38,7 @@ namespace School_Api
             builder.Services.AddScoped<IAuthServices, AuthServices>();
             builder.Services.AddScoped<ITeacherService, TeacherService>();
             builder.Services.AddScoped<ISubjectServices, SubjectServices>();
+            builder.Services.AddScoped<ILessonServices, LessonServices>();
             builder.Services.AddAutoMapper(typeof(UsersProfile).Assembly);
             #endregion
 

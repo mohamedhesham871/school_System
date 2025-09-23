@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace Domain.Contract
         //Want to Make Dynamic Query Later 
         Task<IEnumerable<TEntity>> GetByConditionAsync(ISpecifications<TEntity> Spec);
         Task<TEntity> GetByIdAsyncSpecific( ISpecifications<TEntity> Spec);
-
+        Task<T?> GetEntityWithCode<T>(string code) where T : class, IHasCode;
         void AddAsync(TEntity entity);
         void UpdateAsync(TEntity entity);
         void DeleteAsync(TEntity entity);

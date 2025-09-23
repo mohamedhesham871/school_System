@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence.Contexts;
 
@@ -11,9 +12,11 @@ using Persistence.Contexts;
 namespace Persistence.Data.Migrations
 {
     [DbContext(typeof(SchoolDbContexts))]
-    partial class SchoolDbContextsModelSnapshot : ModelSnapshot
+    [Migration("20250923223956_Make change on table [makeing Each class immplemnt IHasCode]")]
+    partial class MakechangeontablemakeingEachclassimmplemntIHasCode
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -147,11 +150,6 @@ namespace Persistence.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SubjectID"));
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -164,6 +162,11 @@ namespace Persistence.Data.Migrations
 
                     b.Property<int>("GradeID")
                         .HasColumnType("int");
+
+                    b.Property<string>("SubjectCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("SubjectName")
                         .IsRequired()
@@ -180,10 +183,10 @@ namespace Persistence.Data.Migrations
 
                     b.HasKey("SubjectID");
 
-                    b.HasIndex("Code")
-                        .IsUnique();
-
                     b.HasIndex("GradeID");
+
+                    b.HasIndex("SubjectCode")
+                        .IsUnique();
 
                     b.HasIndex("TeacherId");
 

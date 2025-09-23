@@ -9,7 +9,7 @@ namespace Services.SpecificationsFile
 {
     internal class SubjectDuplicationCheck:Specifications<Subject>
     {
-        public SubjectDuplicationCheck(string SCode):base(s=>s.SubjectCode==SCode)
+        public SubjectDuplicationCheck(string SCode):base(s=>s.Code==SCode)
         {
         
         }

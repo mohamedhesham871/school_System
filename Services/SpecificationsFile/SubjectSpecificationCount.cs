@@ -18,7 +18,7 @@ namespace Services.SpecificationsFile
             return s =>
                 (string.IsNullOrEmpty(search)
                     || (s.SubjectName != null && s.SubjectName.ToLower().Contains(search))
-                    || (s.SubjectCode != null && s.SubjectCode.ToLower().Contains(search)));
+                    || (s.Code != null && s.Code.ToLower().Contains(search)));
         }
     }
 }

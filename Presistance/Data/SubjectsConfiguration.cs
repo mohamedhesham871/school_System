@@ -14,8 +14,8 @@ namespace Persistence.Data
         public void Configure(EntityTypeBuilder<Subject> builder)
         {
             builder.HasKey(s=>s.SubjectID);
-            builder.HasIndex(s => s.SubjectCode).IsUnique(); // Unique index
-            builder.Property(s=>s.SubjectCode).IsRequired().HasMaxLength(20);
+            builder.HasIndex(s => s.Code).IsUnique(); // Unique index
+            builder.Property(s=>s.Code).IsRequired().HasMaxLength(20);
             builder.Property(s => s.SubjectName).IsRequired().HasMaxLength(100);
             builder.Property(s => s.Description).HasMaxLength(int.MaxValue);
             builder.Property(s => s.CreatedAt).HasDefaultValueSql("GETDATE()");

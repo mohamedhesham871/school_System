@@ -1,5 +1,6 @@
 ﻿using Domain.Contract;
 using Domain.Exceptions;
+using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Contexts;
 using Services.SpecificationsFile;
@@ -59,5 +60,11 @@ namespace Persistence.Repository
         {
             return await SpecificationEvaluator.CreateQuery(contexts.Set<TEntity>(), spec).AnyAsync();
         }
+        public async Task<T?> GetEntityWithCode<T>(string code) where T : class, IHasCode
+        {
+            return await contexts.Set<T>()
+                                 .FirstOrDefaultAsync(s => s.Code == code);
+        }
+
     }
 }

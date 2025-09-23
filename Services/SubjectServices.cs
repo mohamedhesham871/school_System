@@ -41,7 +41,7 @@ namespace Services
                 }
                 var subject = new Subject
                 {
-                    SubjectCode = subjectDto.SubjectCode,
+                    Code = subjectDto.SubjectCode,
                     SubjectName = subjectDto.SubjectName,
                     Description = subjectDto.Description,
                     GradeID = subjectDto.GradeID,
@@ -81,7 +81,7 @@ namespace Services
             var totalCount = await unitOfWork.GetRepository<Subject, int>().CountAsync(CountAllSubjects);
             var subjectDtos = subjects.Select(s => new SubjectResponseShortDto
             {
-                SubjectCode = s.SubjectCode,
+                SubjectCode = s.Code,
                 SubjectName = s.SubjectName,
                 Description = s.Description,
             });
@@ -103,7 +103,7 @@ namespace Services
             if (subject is null) throw new NotFoundException($"Subject with code '{SubjectCode}' was not found.");
             var subjectDto = new SubjectResponseDto
             {
-                SubjectCode = subject.SubjectCode,
+                SubjectCode = subject.Code,
                 SubjectName = subject.SubjectName,
                 Description = subject.Description,
                 Grade = new Shared.GradeDtos.GradeResponseShortDto
@@ -122,7 +122,7 @@ namespace Services
                 },
                 Lessons =  subject.Lessons.Select(l => new LessonShortResponseDto
                 {
-                    LessonCode = l.LessonCode,
+                    LessonCode = l.Code,
                     Title = l.Title
                 }).ToList()
             };

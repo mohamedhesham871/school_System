@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Models.subject_Lesson;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ namespace Domain.Models.User
         public int? GradeID { get; set; } //Nullable foreign key to Grades table Cause the student may not be assigned to a grade yet OR can Be Graduated OR Left the school
         public int? ClassID { get; set; } // Same as GradeID, Nullable foreign key to Classes table
         public string Status { get; set; } = "Active"; // Active, Inactive, Graduated
+        public ICollection<QuizStudent>? QuizStudents { get; set;} = new List<QuizStudent>();
     }
 }
 

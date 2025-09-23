@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 
 namespace Domain.Models
 {
-    public  class Subject
+    public  class Subject : IHasCode
     {
         public int SubjectID { get; set; } 
-        public string SubjectCode { get; set; } = string.Empty; // Unique code for the subject (e.g., "MATH-101")
+        public string Code { get; set; } = string.Empty; // Unique code for the subject (e.g., "MATH-101")
         public string SubjectName { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.Now;

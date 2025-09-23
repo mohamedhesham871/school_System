@@ -12,7 +12,7 @@ namespace Services.SpecificationsFile
     public class SubjectSpecificationWithGradeAndLessonAndTeacher:Specifications<Subject>
     {
         //get Subject By Id[subjet Code ] With Grade And Lessons And Teacher
-        public SubjectSpecificationWithGradeAndLessonAndTeacher(string SubjectCode):base(s=>s.SubjectCode==SubjectCode)
+        public SubjectSpecificationWithGradeAndLessonAndTeacher(string SubjectCode):base(s=>s.Code==SubjectCode)
         {
             AddInclude(s => s.Grade!);
             AddInclude(s => s.Lessons!);
@@ -51,7 +51,7 @@ namespace Services.SpecificationsFile
                     AddOrderByDescending(t => t.CreatedAt);
                     break;
                 default:
-                    AddOrderBy(t => t.SubjectCode);
+                    AddOrderBy(t => t.Code);
                     break;
             }
         }

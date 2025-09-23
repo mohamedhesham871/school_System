@@ -14,10 +14,12 @@ namespace Persistence.Data
         public void Configure(EntityTypeBuilder<Lesson> builder)
         {   
             builder.HasKey(l => l.LessonId);
-            builder.HasIndex(l=>l.LessonCode).IsUnique();
-            builder.Property(l => l.LessonCode).IsRequired().HasMaxLength(50);
+            builder.HasIndex(l=>l.Code).IsUnique();
+
+            builder.Property(l => l.Code).IsRequired().HasMaxLength(50);
             builder.Property(l => l.Title).IsRequired().HasMaxLength(200);
             builder.Property(l => l.Description).IsRequired();
+
             builder.Property(l => l.CreatedAt).HasDefaultValueSql("GETDATE()");
             builder.Property(l => l.UpdatedAt).HasDefaultValueSql("GETDATE()");
             // Relation with Subject
