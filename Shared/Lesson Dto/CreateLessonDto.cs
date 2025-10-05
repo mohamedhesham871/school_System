@@ -14,7 +14,7 @@ namespace Shared.Lesson_Dto
         public string Title { get; set; } = string.Empty;
         [Required]
         public string Description { get; set; } = string.Empty;
-        public IFormFile? MaterialUrl { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "Order must be greater than 0")]
         public int Order { get; set; }  //Order of the lesson in the subject
     }
 }

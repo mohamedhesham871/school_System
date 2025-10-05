@@ -32,7 +32,7 @@ namespace Presentation.Controllers
             return Ok(res);
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllSubject([FromQuery] SubjectFilteration subjectFilteration)
+        public async Task<IActionResult> GetAllSubject([FromQuery] Subject_LessonFilteration subjectFilteration)
         {
             if (ModelState.IsValid == false) return BadRequest(ModelState);
             var res = await services.GetAllSubjectAsync(subjectFilteration);

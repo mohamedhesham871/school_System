@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Shared
 {
-    public class SubjectFilteration
+    public class Subject_LessonFilteration
     {
         public SortingSubjects? Sorting { get; set; }
         public string? SearchKey { get; set; }

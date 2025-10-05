@@ -1,10 +1,12 @@
-﻿using Domain.Models.subject_Lesson;
+﻿using Domain.Models;
+using Domain.Models.subject_Lesson;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,9 +24,10 @@ namespace Persistence.Data
             builder.HasIndex(q => q.Code).IsUnique();
            
             builder.HasOne(q => q.Lesson)
-                    .WithOne()
+                    .WithOne(l=>l.quiz)
                     .HasForeignKey<Quiz>(q => q.LessonId)
                     .OnDelete(DeleteBehavior.Cascade);
+           
 
             //Relation With Students M:N in OnModelCreating As New Table [StudentQuiz]
             //Relation With Questions 1:M in QuestionConfiguration

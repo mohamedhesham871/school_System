@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Domain.Models.subject_Lesson;
 
 namespace Domain.Models
 {
@@ -22,13 +23,18 @@ namespace Domain.Models
         public DateTime UpdatedAt {  get; set; } 
 
         //Relationships
+       
         public int SubjectId { get; set; }   // FK → Subject
         public Subject Subject { get; set; } = null!;  // Navigation to Subject
+        
+        public Quiz? quiz { get; set; }
+        
+        
         public Lesson()
         {
             Code = Guid.NewGuid().ToString();
-            CreatedAt = DateTime.Now;
-            UpdatedAt = DateTime.Now;
+            CreatedAt = DateTime.UtcNow;
+            UpdatedAt = DateTime.UtcNow;
         }
 
     }

@@ -11,10 +11,24 @@ namespace AbstractionServices
 {
     public interface ILessonServices
     {
-        public Task<string> AddLesson(string subjectCode, CreateLessonDto createLessonDto);
-        public Task<string> UpdateLesson(string lessonCode, UpdateLessonDto updateLessonDto);
-        public Task<string> DeleteLesson(string lessonCode);
-        public Task<LessonDetailsResponseDto> GetLessonByCode(string lessonCode);
-        public Task<PaginationResponse<LessonShortResponseDto>> GetAllLessonsInSubject(string subjectCode);
+         Task<string> AddLesson(string subjectCode, CreateLessonDto createLessonDto,string email);
+         
+         Task<string> UpdateLesson(string lessonCode, UpdateLessonDto updateLessonDto,string email);
+         
+         Task<string> DeleteLesson(string lessonCode);
+         
+         Task<LessonDetailsResponseDto> GetLessonByCode(string lessonCode);
+
+        Task<PaginationResponse<LessonShortResponseDto>> GetAllLessonsInSubject(string subjectCode, Subject_LessonFilteration filteration, string email, string Role);
+
+
+         //Task<PaginationResponse<LessonForAdminDashboardDto>> GetAllforTeacher(string subjectCode, Subject_LessonFilteration filteration,string email);
+        
+         Task<string> UploadFile(string LeesonCode, UploadFileDto fileDto);
+
+         Task<string> DeleteFile(string LessonCode, string email);
+
+
+
     }
 }

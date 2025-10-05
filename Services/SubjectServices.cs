@@ -73,7 +73,7 @@ namespace Services
             throw new DatabaseException("Error in Deleting Subject");
         }
 
-        public async Task<PaginationResponse<SubjectResponseShortDto>> GetAllSubjectAsync(SubjectFilteration subjectFilteration)
+        public async Task<PaginationResponse<SubjectResponseShortDto>> GetAllSubjectAsync(Subject_LessonFilteration subjectFilteration)
         {
            var Spec = new SubjectSpecificationWithGradeAndLessonAndTeacher(subjectFilteration);
             var subjects = await unitOfWork.GetRepository<Subject, int>().GetByConditionAsync(Spec);

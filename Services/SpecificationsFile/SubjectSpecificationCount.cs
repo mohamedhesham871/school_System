@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Services.SpecificationsFile
 {
-    public class SubjectSpecificationCount(SubjectFilteration f):Specifications<Subject>(criteria(f))
+    public class SubjectSpecificationCount(Subject_LessonFilteration f) : Specifications<Subject>(criteria(f))
     {
-        public static Expression<Func<Subject, bool>> criteria(SubjectFilteration f)
+        public static Expression<Func<Subject, bool>> criteria(Subject_LessonFilteration f)
         {
             var search = f.SearchKey?.Trim().ToLower();
 
@@ -21,4 +21,5 @@ namespace Services.SpecificationsFile
                     || (s.Code != null && s.Code.ToLower().Contains(search)));
         }
     }
+
 }

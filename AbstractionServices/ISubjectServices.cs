@@ -15,7 +15,7 @@ namespace AbstractionServices
         //Delete Subject
         Task<string> DeleteSubjectAsync(string subjectCode);
         //Get All Subjects with Grade
-        Task<PaginationResponse<SubjectResponseShortDto>> GetAllSubjectAsync(SubjectFilteration subjectFilteration);
+        Task<PaginationResponse<SubjectResponseShortDto>> GetAllSubjectAsync(Subject_LessonFilteration subjectFilteration);
         //Get Subject By Id
         Task<SubjectResponseDto> GetSubjectByCodeAsync(string SubjectCode);
 
