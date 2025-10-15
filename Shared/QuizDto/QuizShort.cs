@@ -8,8 +8,10 @@ namespace Shared.QuizDto
 {
     public class QuizShort
     {
+
         public string QuizCode { get; set; }
         public string Title { get; set; }
+        public string LessonTitle { get; set; }
         public int TotalMarks { get; set; }
 
     }

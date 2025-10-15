@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Shared.QuizDto
 {
-    public class QuizDto
+    public class QuizResponseDto
     {
         public string QuizCode { get; set; }
         public string Title { get; set; }
