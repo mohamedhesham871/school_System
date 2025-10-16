@@ -14,6 +14,7 @@ using Services.Profiles;
 using Shared;
 using System.Text;
 using Microsoft.Extensions.Logging;
+using School_Api.ErrorHnadlingMidlleware;
 
 namespace School_Api
 {
@@ -85,6 +86,8 @@ namespace School_Api
 
             #endregion
             var app = builder.Build();
+            //Global Error Handling Middleware
+            app.UseMiddleware<GlobalErrorHandlingMiddleware>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

@@ -54,7 +54,10 @@ namespace Services
 
             var createRes = await _manager.CreateAsync(user, teacherDto.Password);
             if (!createRes.Succeeded)
-                throw new BadRequestException(string.Join(", ", createRes.Errors.Select(e => e.Description)));
+            {
+                var errors = createRes.Errors.Select(e => e.Description);
+                throw new ValidationErrorsExecption(errors);
+            }
 
             await _manager.AddToRoleAsync(user, "Teacher");
 
@@ -189,7 +192,7 @@ namespace Services
                 if (!res.Succeeded)
                 {
                     var errors = res.Errors.Select(e => e.Description);
-                    throw new BadRequestException(string.Join(", ", errors));
+                    throw new ValidationErrorsExecption(errors);
                 }
             }
             catch(Exception)
@@ -211,7 +214,7 @@ namespace Services
             if (!res.Succeeded)
             {
                 var errors = res.Errors.Select(e => e.Description);
-                throw new BadRequestException(string.Join(", ", errors));
+                throw new ValidationErrorsExecption( errors);
             }
             return true;
         }

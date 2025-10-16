@@ -127,3 +127,43 @@ namespace Services
     }
    
 }
+/*
+ ## 1. Authentication & Authorization
+- `POST /Api/Auth/Login` - User login
+- `POST /Api/Auth/Logout` - User logout
+- `POST /Api/Auth/RefreshToken` - Refresh access token
+- `POST /Api/Auth/ChangePassword` - Change current password
+- `POST /Api/Auth/ForgotPassword` - Request password reset
+- `POST /Api/Auth/ResetPassword` - Reset password with token
+- `POST /Api/Auth/VerifyEmail` - Verify email address
+- `POST /Api/Auth/ResendVerification` - Resend verification email
+
+## 2. User Management APIs
+### Admin
+- `GET /Api/Admin/Dashboard` - Get admin dashboard statistics
+- `GET /Api/Admin/Profile` - Get admin profile
+- `PUT /Api/Admin/Profile` - Update admin profile
+- `GET /Api/Admin/Users` - Get all users (paginated)
+- `GET /Api/Admin/Users/{id}` - Get user by ID
+- `PUT /Api/Admin/Users/{id}/Status` - Activate/Deactivate user
+- `DELETE /Api/Admin/Users/{id}` - Delete user
+- `GET /Api/Admin/Analytics` - Get system analytics
+- `GET /Api/Admin/Reports` - Generate system reports
+
+### Teacher
+- `GET /Api/Teacher/Dashboard` - Get teacher dashboard
+- `GET /Api/Teacher/Q` - Get teacher profile
+- `PUT /Api/Teacher/Profile` - Update teacher profile
+- `GET /Api/Teacher/MyClasses` - Get assigned classes
+- `GET /Api/Teacher/MySubjects` - Get assigned subjects
+- `GET /Api/Teacher/Schedule` - Get teaching schedule
+- `GET /Api/Teacher/Students` - Get all students in teacher's classes
+
+### Student
+- `GET /Api/Student/Dashboard` - Get student dashboard
+- `GET /Api/Student/Profile` - Get student profile
+- `PUT /Api/Student/Profile` - Update student profile
+- `GET /Api/Student/MyClasses` - Get enrolled classes
+- `GET /Api/Student/MySubjects` - Get enrolled subjects
+- `GET /Api/Student/Schedule` - Get class schedule
+- `GET /Api/Student/Grades` - Get all grades/results*/
