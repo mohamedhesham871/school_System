@@ -24,10 +24,8 @@ namespace Services
         {
             // check if user exist
             var user = await  _user.FindByEmailAsync(loginUser.Email);
-            if (user is null) throw new NotFoundException($"user with Email {loginUser.Email} Not Found Please Enter Valid email");
-            // check if password is correct
-            var isCorrect = await _user.CheckPasswordAsync(user, loginUser.Password);
-            if (!isCorrect) throw new BadRequestException("Password is Incorrect Please Enter Valid Password");
+            if (user is null || await _user.CheckPasswordAsync(user, loginUser.Password))    
+            throw new BadRequestException("Password Or Email  Not Vlaid Please try Again");
            
             return new UserResultDto
             {
