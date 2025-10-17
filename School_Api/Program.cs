@@ -15,6 +15,7 @@ using Shared;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using School_Api.ErrorHnadlingMidlleware;
+using StackExchange.Redis;
 
 namespace School_Api
 {
@@ -58,9 +59,14 @@ namespace School_Api
             #endregion
             builder.Services.AddDbContext<SchoolDbContexts>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolDbConnection")));
-
-            #region Authorize And Authentication
-            builder.Services.Configure<JwtToken>(builder.Configuration.GetSection("JwtOptions"));
+           
+            //Add Redis
+            builder.Services.AddSingleton<IConnectionMultiplexer>((serviceProvider) =>
+            {
+                return ConnectionMultiplexer.Connect(builder.Configuration.GetConnectionString("Redis"));
+            });
+                #region Authorize And Authentication
+                builder.Services.Configure<JwtToken>(builder.Configuration.GetSection("JwtOptions"));
             var JWTtoken = builder.Configuration.GetSection("JwtOptions").Get<JwtToken>();
 
             builder.Services.AddAuthentication(options =>

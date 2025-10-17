@@ -6,14 +6,19 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Shared;
 using Shared.IdentityDtos;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -22,7 +27,7 @@ using System.Threading.Tasks;
 
 namespace Services
 {
-    public class AuthServices(UserManager<AppUsers> _user,IOptions<JwtToken> options,IMapper mapper) : IAuthServices
+    public class AuthServices(UserManager<AppUsers> _user,IOptions<JwtToken> options,IMapper mapper ,IConnectionMultiplexer connectionMultiplexer) : IAuthServices
     {
         //Log In
         public async Task<UserResponseDto> Login(LoginUserDto loginUser)
@@ -143,12 +148,17 @@ namespace Services
         public async Task<GenericResponseDto> ChangePassword(ChangePasswordDto changePassword, string token)
         {
             // check User  By Token 
-       
-      
-            var user = _user.Users.SingleOrDefault(u => u.RefresTokens.Any(t => t.Token == token && t.IsActive && !t.IsExpired));
+
+
+            var user = _user.Users.SingleOrDefault(u => u.RefresTokens.Any(t => t.Token == token));
 
             if (user is null)
                 throw new NotFoundException("Invalid Token Of User.");
+           
+            //check if Token Is valid
+            var checkvalidToken = user.RefresTokens.SingleOrDefault(r => r.Token == token);
+            if (!checkvalidToken.IsActive)
+                throw new BadRequestException("Token Is Expired");
 
           
             //Update Password   If Old Password Wrong Method Will Handl that 
@@ -164,12 +174,26 @@ namespace Services
             
         }
 
-
-
-
-        public Task<GenericResponseDto> ForgetPassword(ForgetPasswordDto forgetPassword)
+        public async Task<GenericResponseDto> ForgetPassword(ForgetPasswordDto forgetPassword)
         {
-            throw new NotImplementedException();
+
+           var user = _user.FindByEmailAsync(forgetPassword.Email);
+            if (user is null) 
+                throw new NotFoundException($"user with Email {forgetPassword.Email} Not Found Please Enter Valid email");
+
+            // Generate OTP  To Send To User Email
+            var OTP = GenrarteOTP();
+            // Send Email To User
+            var subject = "Password Reset OTP";
+            var emailSent = await SendEmailOTP(forgetPassword.Email, OTP, subject);
+            if(!emailSent)
+                throw new BadRequestException("Failed to send OTP email.");
+            //Store OTP in User Table with Expiry Time
+            var storeOTP= new Store_OTP(connectionMultiplexer);
+            storeOTP.StoreOTP(forgetPassword.Email, OTP);
+            // Send Response
+            return new GenericResponseDto() { Message = "OTP Sent To Your Email Successfully.", IsSuccess = true };
+
         }
 
         public Task<GenericResponseDto> ResetPassword(ResetPasswordDto resetPassword)
@@ -231,7 +255,48 @@ namespace Services
             };
         }
 
-       
+        private string GenrarteOTP()
+        {
+            var random = new Random();
+            return random.Next(100000, 999999).ToString();
+        }
+
+        private async Task<bool> SendEmailOTP(string email, string OTP,string subject)
+        {
+            // check on OTP 
+            if (string.IsNullOrEmpty(OTP) ||OTP.Length!=6|| !int.TryParse(OTP, out _))
+            {
+                throw new BadRequestException("Invalid OTP !!");
+            }
+            // Send Email Logic Here
+            var emailSettings = new MailMessage();
+
+            emailSettings.From = new MailAddress("mmmelkady23@gmail.com");
+            emailSettings.To.Add(email);
+            emailSettings.Subject = subject;
+            emailSettings.Body = $"Your OTP Code is : {OTP} ,note will Exprire 5 Min";
+
+            using var smtp = new SmtpClient(host: "smtp.gmail.com", port: 587);
+            smtp.EnableSsl = true;
+            smtp.Credentials = new NetworkCredential("mmmelkady23@gmail.com", "bofcvpywsuajloai");
+
+            try
+            {
+                await smtp.SendMailAsync(emailSettings);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new BadRequestException($"Failed to send OTP email. {ex}");
+            }
+            finally
+            {
+                emailSettings.Dispose(); // Dispose of the email message to free resources
+            }
+
+        }
+
+
 
     }
     //public async Task<UserResultDto> RegisterStudent(RegisterStudentDto registerUser)

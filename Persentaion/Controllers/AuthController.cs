@@ -74,7 +74,15 @@ namespace Presentation.Controllers
             return Ok(res);
 
         }
+        [HttpPost("ForgetPassword")]
+        public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordDto forgetPassword)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            var res = await services.ForgetPassword(forgetPassword);
+            return Ok(res);
+        }
         [HttpGet("Profile")]
         [Authorize]
         public async Task<IActionResult> GetProfile()
