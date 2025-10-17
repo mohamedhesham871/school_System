@@ -3,6 +3,7 @@ using AutoMapper;
 using Domain.Exceptions;
 using Domain.Models.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -13,77 +14,96 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Services
 {
     public class AuthServices(UserManager<AppUsers> _user,IOptions<JwtToken> options,IMapper mapper) : IAuthServices
     {
-        public async Task<UserResultDto> Login(LoginUserDto loginUser)
+        public async Task<UserResponseDto> Login(LoginUserDto loginUser)
         {
             // check if user exist
             var user = await  _user.FindByEmailAsync(loginUser.Email);
-            if (user is null || await _user.CheckPasswordAsync(user, loginUser.Password))    
+            if (user is null || !await _user.CheckPasswordAsync(user, loginUser.Password))    
             throw new BadRequestException("Password Or Email  Not Vlaid Please try Again");
-           
-            return new UserResultDto
+            var userReponse =new UserResponseDto();
+
+            //Genrate Access Token
+            var token= await GenrateToken(user);
+
+            //Add Data Of Reponse 
+            userReponse.message = "User Login Successfully";
+            userReponse.IsAuthenticated = true;
+            userReponse.UserName = user.UserName;
+            userReponse.Email = user.Email;
+            userReponse.AccessToken = new JwtSecurityTokenHandler().WriteToken(token); ;
+            userReponse.AccesstokenExpireTime =token.ValidTo;
+
+
+            //Check Refresh Token if Exist
+            if (user.RefresTokens.Any(i => i.IsActive))
             {
-                UserEmail = user.Email!,
-                UserName = user.UserName!,
-                Token = await GenrateToken(user)
-            };
+                var activeRefreshToken = user.RefresTokens.Where(i => i.IsActive).SingleOrDefault();
+                userReponse.RefreshToken = activeRefreshToken.Token;
+                userReponse.RefreshtokenExpireTime = activeRefreshToken.ExpiredOn;
+            }
+            else
+            {
+                var newRefreshToken = GenrateRefreshTokenAsync();
+                user.RefresTokens.Add(newRefreshToken);
+                await _user.UpdateAsync(user);
+                userReponse.RefreshToken = newRefreshToken.Token;
+                userReponse.RefreshtokenExpireTime = newRefreshToken.ExpiredOn;
+            }
+            return userReponse;
         }
 
-        public async Task<UserResultDto> RegisterStudent(RegisterStudentDto registerUser)
+        public async  Task<UserResponseDto> RefreshToken(string token)
         {
-            // Check if user already exist
-            var user = await  _user.FindByEmailAsync(registerUser.Email);
-            if (user is not null) throw new BadRequestException($"user with Email {registerUser.Email} Already Exist Please Enter Another email");
+            var userResponse = new UserResponseDto();
+            // check User By Token 
+            var user =  _user.Users.SingleOrDefault(u => u.RefresTokens.Any(t => t.Token == token));
 
-            //Check if Password is match with Confirm Password
-            if (registerUser.Password != registerUser.confirmPassword) throw new BadRequestException("Password and Confirm Password do not match");
-
-            //chechk if profile image not null
-            var UserPictureProfile = "images/Default_Icone.png";
-
-            if (registerUser.ProfileImage != null && registerUser.ProfileImage.Length > 0)
+            if(user is null)
             {
-                var UploadImage = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
-                var fileName = $"{Guid.NewGuid()}_{registerUser.ProfileImage.FileName}";
-                var filePath = Path.Combine(UploadImage, fileName);
-
-                using (var Stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await registerUser.ProfileImage.CopyToAsync(Stream);
-                }
-                UserPictureProfile = $"/images/{fileName}"; // Set the new profile picture path
+                userResponse.message = "Invalid Token";
+                userResponse.IsAuthenticated = false;
+                return userResponse;
             }
-
-            // Add New User
-            var Student = mapper.Map<Students>(registerUser);
-            Student.ProfileImage = UserPictureProfile;
-            
-            var result = await _user.CreateAsync(Student, registerUser.Password);
-            if (!result.Succeeded)
+            var oldRefreshToken = user.RefresTokens.SingleOrDefault(t => t.Token==token);
+          //check if Token is Active if Go out 
+            if(!oldRefreshToken.IsActive)
             {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new BadRequestException($"Failed to create user: {errors}");
+                userResponse.message = "InActive Token";
+                userResponse.IsAuthenticated = false;
+                return userResponse;
             }
+            // revoke Old Token 
+            oldRefreshToken.RevokedOn = DateTime.UtcNow;
+            //create New Token
+            var newRefreshToken =  GenrateRefreshTokenAsync();
+            user.RefresTokens.Add(newRefreshToken);
+            await _user.UpdateAsync(user);
 
-            // Assign Role to User
-            await _user.AddToRoleAsync(Student, "Student");
-            return new UserResultDto
-            {
-                UserEmail = Student.Email!,
-                UserName = Student.UserName!,
-                Token = await GenrateToken(Student)
-            };
+            //Create New AccessToken and Return Data
+            var Accesstoken = await GenrateToken(user);
+            userResponse.AccessToken = new JwtSecurityTokenHandler().WriteToken(Accesstoken);
+            userResponse.message = "Create Refesh Token Successfully";
+            userResponse.IsAuthenticated = true;
+            userResponse.UserName = user.UserName;
+            userResponse.Email = user.Email;
+            userResponse.AccesstokenExpireTime = Accesstoken.ValidTo;
+            userResponse.RefreshToken = newRefreshToken.Token;
+            userResponse.RefreshtokenExpireTime = newRefreshToken.ExpiredOn;
+
+            return userResponse;
 
         }
 
-       
-    
+
         public async Task<UserProfileDto> UserProfile(string Email)
         {
             var user =await  _user.FindByEmailAsync(Email);
@@ -93,7 +113,36 @@ namespace Services
         }
 
 
-        public async Task<string> GenrateToken(AppUsers user)
+       
+        public Task<GenericResponseDto> Logout(string RefreshToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<GenericResponseDto> ChangePassword(ChangePasswordDto changePassword)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<GenericResponseDto> ForgetPassword(ForgetPasswordDto forgetPassword)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<GenericResponseDto> ResetPassword(ResetPasswordDto resetPassword)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<GenericResponseDto> VerifyEmail(VerifyEmailDto verifyEmail)
+        {
+            throw new NotImplementedException();
+        }
+
+
+
+
+        private async Task<JwtSecurityToken> GenrateToken(AppUsers user)
         {
             var jwtToken = options.Value;
             var userClaim = new List<Claim>()
@@ -114,16 +163,72 @@ namespace Services
                  , expires: DateTime.UtcNow.AddDays(jwtToken.DurationDays)// Token will expire after 7 days
                  , signingCredentials: new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256Signature)
                  );
-            // Generate the token string
-            var tokenHandler = new JwtSecurityTokenHandler().WriteToken(token);
-            return tokenHandler;
-
-         
+            return token;
         }
 
-        
+        private  RefresTokens GenrateRefreshTokenAsync()
+        {
+            var ran = new byte[32];
+          using  var gen = RandomNumberGenerator.Create();
+            gen.GetBytes(ran);
+
+            return new RefresTokens
+            {
+                Token = Convert.ToBase64String(ran),
+                ExpiredOn = DateTime.UtcNow.AddDays(30) ,
+                CreatedOn = DateTime.UtcNow
+            };
+        }
+
+       
+
     }
-   
+    //public async Task<UserResultDto> RegisterStudent(RegisterStudentDto registerUser)
+    //{
+    //    // Check if user already exist
+    //    var user = await  _user.FindByEmailAsync(registerUser.Email);
+    //    if (user is not null) throw new BadRequestException($"user with Email {registerUser.Email} Already Exist Please Enter Another email");
+
+    //    //Check if Password is match with Confirm Password
+    //    if (registerUser.Password != registerUser.confirmPassword) throw new BadRequestException("Password and Confirm Password do not match");
+
+    //    //chechk if profile image not null
+    //    var UserPictureProfile = "images/Default_Icone.png";
+
+    //    if (registerUser.ProfileImage != null && registerUser.ProfileImage.Length > 0)
+    //    {
+    //        var UploadImage = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
+    //        var fileName = $"{Guid.NewGuid()}_{registerUser.ProfileImage.FileName}";
+    //        var filePath = Path.Combine(UploadImage, fileName);
+
+    //        using (var Stream = new FileStream(filePath, FileMode.Create))
+    //        {
+    //            await registerUser.ProfileImage.CopyToAsync(Stream);
+    //        }
+    //        UserPictureProfile = $"/images/{fileName}"; // Set the new profile picture path
+    //    }
+
+    //    // Add New User
+    //    var Student = mapper.Map<Students>(registerUser);
+    //    Student.ProfileImage = UserPictureProfile;
+
+    //    var result = await _user.CreateAsync(Student, registerUser.Password);
+    //    if (!result.Succeeded)
+    //    {
+    //        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+    //        throw new BadRequestException($"Failed to create user: {errors}");
+    //    }
+
+    //    // Assign Role to User
+    //    await _user.AddToRoleAsync(Student, "Student");
+    //    return new UserResultDto
+    //    {
+    //        UserEmail = Student.Email!,
+    //        UserName = Student.UserName!,
+    //        Token = await GenrateToken(Student)
+    //    };
+
+    //}
 }
 /*
  ## 1. Authentication & Authorization

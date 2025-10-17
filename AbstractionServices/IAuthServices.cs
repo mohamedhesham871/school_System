@@ -1,4 +1,5 @@
-﻿using Shared.IdentityDtos;
+﻿using Shared;
+using Shared.IdentityDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,8 +10,15 @@ namespace AbstractionServices
 {
     public interface IAuthServices
     {
-        Task<UserResultDto> Login(LoginUserDto loginUser);
-        Task<UserResultDto> RegisterStudent(RegisterStudentDto registerUser);
+        // No Register Method for Users Only Admin Can Create Users
+        Task<UserResponseDto> Login(LoginUserDto loginUser);
+        Task<UserResponseDto> RefreshToken(string token);
+        Task<GenericResponseDto> Logout(string RefreshToken);
+        Task<GenericResponseDto> ChangePassword(ChangePasswordDto changePassword);
+        Task<GenericResponseDto> ForgetPassword(ForgetPasswordDto forgetPassword);
+        Task<GenericResponseDto> ResetPassword(ResetPasswordDto resetPassword);
+        Task<GenericResponseDto> VerifyEmail(VerifyEmailDto verifyEmail);
+
         Task<UserProfileDto> UserProfile(string Email);
     }
 }

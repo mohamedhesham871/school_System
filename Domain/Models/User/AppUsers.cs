@@ -17,7 +17,7 @@ namespace Domain.Models.User
         public string? ProfileImage { get; set; } = "images/Default.png";
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-
+        public List<RefresTokens?> RefresTokens { get; set; }
 
 
     }

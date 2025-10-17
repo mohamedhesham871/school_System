@@ -13,3 +13,5 @@ namespace Shared.IdentityDtos
         public string Token { get; set; } = string.Empty;
     }
 }
+
+//Will Delete this Class
