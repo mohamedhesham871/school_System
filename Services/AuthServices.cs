@@ -4,6 +4,7 @@ using Domain.Exceptions;
 using Domain.Models.User;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -23,6 +24,7 @@ namespace Services
 {
     public class AuthServices(UserManager<AppUsers> _user,IOptions<JwtToken> options,IMapper mapper) : IAuthServices
     {
+        //Log In
         public async Task<UserResponseDto> Login(LoginUserDto loginUser)
         {
             // check if user exist
@@ -61,6 +63,7 @@ namespace Services
             return userReponse;
         }
 
+        //Refresh Token 
         public async  Task<UserResponseDto> RefreshToken(string token)
         {
             var userResponse = new UserResponseDto();
@@ -103,26 +106,66 @@ namespace Services
 
         }
 
-
-        public async Task<UserProfileDto> UserProfile(string Email)
+        //Log Out
+        public async Task<GenericResponseDto> Logout(string RefreshToken)
         {
-            var user =await  _user.FindByEmailAsync(Email);
-            if (user is null) throw new NotFoundException($"user with Email {Email} Not Found Please Enter Valid email");
-            var userProfile = mapper.Map<UserProfileDto>(user);
-            return userProfile;
+            //check on user that Have Token 
+            var user = _user.Users.SingleOrDefault(t => t.RefresTokens.Any(s => s.Token == RefreshToken));
+
+            if (user is null)
+                throw new NotFoundException("Invalid Token Sent");
+
+            var OldRefreshToken = user.RefresTokens.Single(t => t.IsActive);
+
+            if (OldRefreshToken is null ) //Not Sure 
+                throw new BadRequestException("No Token Valid");
+
+            // Revoke Old Token 
+            OldRefreshToken.RevokedOn = DateTime.UtcNow;
+           var res = await  _user.UpdateAsync(user);
+
+            if(!res.Succeeded)
+            {
+                var error = res.Errors.Select(e => e.Description);
+                throw new ValidationErrorsExecption(error);
+            }
+            var response = new GenericResponseDto()
+            {
+                Message = "Log Out Successfully .",
+                IsSuccess = true
+            
+            };
+            return response;
         }
 
+        //Change password
 
+        public async Task<GenericResponseDto> ChangePassword(ChangePasswordDto changePassword, string token)
+        {
+            // check User  By Token 
        
-        public Task<GenericResponseDto> Logout(string RefreshToken)
-        {
-            throw new NotImplementedException();
+      
+            var user = _user.Users.SingleOrDefault(u => u.RefresTokens.Any(t => t.Token == token && t.IsActive && !t.IsExpired));
+
+            if (user is null)
+                throw new NotFoundException("Invalid Token Of User.");
+
+          
+            //Update Password   If Old Password Wrong Method Will Handl that 
+          var res= await _user.ChangePasswordAsync(user, changePassword.OldPassword, changePassword.NewPassword);
+            
+            if(!res.Succeeded)
+            {
+                var error = res.Errors.Select(d => d.Description);
+                throw new ValidationErrorsExecption(error);
+            }
+
+            return new GenericResponseDto() { Message = "Password Changed Successfully.", IsSuccess = true };
+            
         }
 
-        public Task<GenericResponseDto> ChangePassword(ChangePasswordDto changePassword)
-        {
-            throw new NotImplementedException();
-        }
+
+
 
         public Task<GenericResponseDto> ForgetPassword(ForgetPasswordDto forgetPassword)
         {
@@ -137,6 +180,14 @@ namespace Services
         public Task<GenericResponseDto> VerifyEmail(VerifyEmailDto verifyEmail)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<UserProfileDto> UserProfile(string Email)
+        {
+            var user = await _user.FindByEmailAsync(Email);
+            if (user is null) throw new NotFoundException($"user with Email {Email} Not Found Please Enter Valid email");
+            var userProfile = mapper.Map<UserProfileDto>(user);
+            return userProfile;
         }
 
 

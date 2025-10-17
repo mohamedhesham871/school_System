@@ -48,6 +48,33 @@ namespace Presentation.Controllers
 
             return Ok(res);
         }
+
+        [HttpPost("LogOut")]
+        public async Task<IActionResult> LogOut()
+        {
+            var token = Request.Cookies["RefreshToken"];
+
+            if (string.IsNullOrEmpty(token))
+                return BadRequest("Invalid Token");
+
+            var res = await services.Logout(token);
+            return Ok(res);
+
+        }
+        [HttpPut("ChangePasswrod")]
+        [Authorize]
+        public async Task<IActionResult> ChangePassword([FromForm]ChangePasswordDto changePassword)
+        {
+            var token = Request.Cookies["RefreshToken"];
+
+            if (string.IsNullOrEmpty(token))
+                return BadRequest("Invalid Token");
+
+            var res = await services.ChangePassword(changePassword, token);
+            return Ok(res);
+
+        }
+
         [HttpGet("Profile")]
         [Authorize]
         public async Task<IActionResult> GetProfile()

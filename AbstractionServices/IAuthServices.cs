@@ -14,7 +14,7 @@ namespace AbstractionServices
         Task<UserResponseDto> Login(LoginUserDto loginUser);
         Task<UserResponseDto> RefreshToken(string token);
         Task<GenericResponseDto> Logout(string RefreshToken);
-        Task<GenericResponseDto> ChangePassword(ChangePasswordDto changePassword);
+        Task<GenericResponseDto> ChangePassword(ChangePasswordDto changePassword,string Token);
         Task<GenericResponseDto> ForgetPassword(ForgetPasswordDto forgetPassword);
         Task<GenericResponseDto> ResetPassword(ResetPasswordDto resetPassword);
         Task<GenericResponseDto> VerifyEmail(VerifyEmailDto verifyEmail);
