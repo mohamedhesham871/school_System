@@ -62,7 +62,7 @@ namespace Presentation.Controllers
 
         }
        
-        [HttpPut("ChangePasswrod")]
+        [HttpPost("ChangePasswrod")]
         [Authorize]
         public async Task<IActionResult> ChangePassword([FromForm]ChangePasswordDto changePassword)
         {
@@ -96,7 +96,17 @@ namespace Presentation.Controllers
 
             return Ok(res);
         }
-        
+
+        [HttpPost("VerifyEmail")]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyEmailDto verifyEmail)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var res = await services.VerifyEmail(verifyEmail);
+            return Ok(res);
+        }
+
         [HttpGet("Profile")]
         [Authorize]
         public async Task<IActionResult> GetProfile()

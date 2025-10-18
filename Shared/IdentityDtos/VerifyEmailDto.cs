@@ -8,9 +8,8 @@ namespace Shared.IdentityDtos
 {
     public  class VerifyEmailDto
     {
-        public string UserId { get; set; }
-        public string Email { get; set; }
-        public string Token { get; set; }
+        public string? Email { get; set; }
+        public string? Token { get; set; }
 
     }
 }

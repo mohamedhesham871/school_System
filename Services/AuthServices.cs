@@ -216,9 +216,28 @@ namespace Services
             return new GenericResponseDto { IsSuccess = true, Message = "Reset Password" };
         }
 
-        public Task<GenericResponseDto> VerifyEmail(VerifyEmailDto verifyEmail)
+        public async Task<GenericResponseDto> VerifyEmail(VerifyEmailDto verifyEmail)
         {
-            throw new NotImplementedException();
+                // Find user by email
+                var user = await _user.FindByEmailAsync(verifyEmail.Email);
+               
+                 if (user is null)
+                    throw new NotFoundException("Invalid user email.");
+
+                // Try to confirm the email using token
+                var result = await _user.ConfirmEmailAsync(user, verifyEmail.Token);
+                
+                if (!result.Succeeded)
+                {
+                    var errors = result.Errors.Select(e => e.Description);
+                    throw new ValidationErrorsExecption(errors);
+                }
+
+                return new GenericResponseDto
+                {
+                    IsSuccess = true,
+                    Message = "Email verified successfully."
+                };
         }
 
         public async Task<UserProfileDto> UserProfile(string Email)
@@ -315,12 +334,6 @@ namespace Services
 
 /*
  ## 1. Authentication & Authorization
-- `POST /Api/Auth/Login` - User login
-- `POST /Api/Auth/Logout` - User logout
-- `POST /Api/Auth/RefreshToken` - Refresh access token
-- `POST /Api/Auth/ChangePassword` - Change current password
-- `POST /Api/Auth/ForgotPassword` - Request password reset
-- `POST /Api/Auth/ResetPassword` - Reset password with token
 - `POST /Api/Auth/VerifyEmail` - Verify email address
 - `POST /Api/Auth/ResendVerification` - Resend verification email
 
