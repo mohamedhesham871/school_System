@@ -56,6 +56,12 @@ namespace School_Api
             })
            .AddEntityFrameworkStores<SchoolDbContexts>()
            .AddDefaultTokenProviders();
+            // Make Token Valid for 1 Hour When Forget Password
+            builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+            {
+                options.TokenLifespan = TimeSpan.FromHours(1);
+            });
+
             #endregion
             builder.Services.AddDbContext<SchoolDbContexts>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("SchoolDbConnection")));

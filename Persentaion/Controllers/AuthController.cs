@@ -61,6 +61,7 @@ namespace Presentation.Controllers
             return Ok(res);
 
         }
+       
         [HttpPut("ChangePasswrod")]
         [Authorize]
         public async Task<IActionResult> ChangePassword([FromForm]ChangePasswordDto changePassword)
@@ -74,6 +75,7 @@ namespace Presentation.Controllers
             return Ok(res);
 
         }
+        
         [HttpPost("ForgetPassword")]
         public async Task<IActionResult> ForgetPassword([FromBody] ForgetPasswordDto forgetPassword)
         {
@@ -83,6 +85,18 @@ namespace Presentation.Controllers
             var res = await services.ForgetPassword(forgetPassword);
             return Ok(res);
         }
+
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPasswrod([FromBody] ResetPasswordDto resetPassword)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var res =await services.ResetPassword(resetPassword);
+
+            return Ok(res);
+        }
+        
         [HttpGet("Profile")]
         [Authorize]
         public async Task<IActionResult> GetProfile()
