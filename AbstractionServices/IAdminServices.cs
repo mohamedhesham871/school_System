@@ -55,12 +55,7 @@ namespace AbstractionServices
 
         //For Class Management
         #region ForClassManagement
-        Task<PaginationResponse<ClassShortResponseDto>> GetAllClasses(ClassFilteration filter);
-        Task<GenericResponseDto> AddClass(int GradeId, ClassCreateOrUpdate create);
-        Task<GenericResponseDto> UpdateClass(string ClassCode, ClassCreateOrUpdate update);
-        Task<GenericResponseDto> DeleteClass(string ClassCode);
-        Task<ClassDetialsResponseDto> classDetialsResponseDto(string ClassCode);
-
+     
         #endregion
 
     }

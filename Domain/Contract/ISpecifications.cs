@@ -9,6 +9,7 @@ namespace Domain.Contract
 {
     public  interface ISpecifications<TEnity> where TEnity : class
     {
+
         Expression<Func<TEnity, bool>> Criteria { get; }
         List<Expression<Func<TEnity, object>>> Includes { get; }
         Expression<Func<TEnity, object>> OrderBy { get; }
