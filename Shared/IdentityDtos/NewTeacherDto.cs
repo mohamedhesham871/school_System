@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Shared.IdentityDtos
 {
-    public class NewTeacherDto
+    public class CreateTeacherDto
     {
         public string FirstName { get; set; } = null!;
         public string LastName { get; set; } = null!;
@@ -27,9 +27,7 @@ namespace Shared.IdentityDtos
         public IFormFile? ProfileImage { get; set; } 
         public DateTime HiringDate { get; set; }
         public string Specialization { get; set; } = null!;
-        public TeacherState Status { get; set; } = TeacherState.Active;
-        public ICollection<int>? AssignedSubjects { get; set; } = [];
-        public ICollection<int>? AssignedClasses { get; set; } = [];
+        public UserState Status { get; set; } = UserState.Active;
 
     }
 }

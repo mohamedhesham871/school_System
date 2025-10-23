@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Shared.IdentityDtos
 {
-    public class TeacherShortResponse
+    public class TeacherShortResponseDto
     {
         public string FirstName { get; set; } = null!;
         public string UserName { get; set; } = null!;

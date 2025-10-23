@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Shared;
 using Shared.IdentityDtos;
+using Shared.IdentityDtos.Auth;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;

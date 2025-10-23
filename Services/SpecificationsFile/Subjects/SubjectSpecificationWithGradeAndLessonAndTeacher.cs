@@ -6,13 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-namespace Services.SpecificationsFile
+using subject = Domain.Models.Subject;
+namespace Services.SpecificationsFile.Subjects
 {
-    public class SubjectSpecificationWithGradeAndLessonAndTeacher:Specifications<Subject>
+    public class SubjectSpecificationWithGradeAndLessonAndTeacher : Specifications<subject>
     {
         //get Subject By Id[subjet Code ] With Grade And Lessons And Teacher
-        public SubjectSpecificationWithGradeAndLessonAndTeacher(string SubjectCode):base(s=>s.Code==SubjectCode)
+        public SubjectSpecificationWithGradeAndLessonAndTeacher(string SubjectCode) : base(s => s.Code == SubjectCode)
         {
             AddInclude(s => s.Grade!);
             AddInclude(s => s.Lessons!);
@@ -33,7 +33,7 @@ namespace Services.SpecificationsFile
                 ApplyPaging(subjectFilteration.PageIndex, subjectFilteration.PageSize);
             }
         }
-        
+
         private void Sorting(Subject_LessonFilteration subjectFilteration)
         {
             switch (subjectFilteration.Sorting)

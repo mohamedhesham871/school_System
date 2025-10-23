@@ -14,7 +14,7 @@ namespace AbstractionServices
         Task<string> UpdateQuestion(string questionCode,string QuizCode, QuestionCreateOrUpdateDto questionUpdateDto ,string email);
         Task<string> DeleteQuestion(string questionCode,string QuizCode, string email);
         Task<QuestionDto> GetQuestionByCode(string questionCode);
-        Task<PaginationResponse<QuestionDto>> GetAllQuestions(string QuizCode);
+        Task<PaginationResponse<QuestionDto>> GetAllQuestions(string QuizCode,int Index);
 
 
 

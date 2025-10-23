@@ -15,6 +15,6 @@ namespace Domain.Models
         public Teacher Teacher { get; set; }
        
         public int ClassID { get; set; }
-        public StudentClass Class { get; set; }
+        public ClassEntity Class { get; set; }
     }
 }

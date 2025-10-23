@@ -1,5 +1,6 @@
 ﻿using Shared;
 using Shared.IdentityDtos;
+using Shared.IdentityDtos.Auth;
 using System;
 using System.Collections.Generic;
 using System.Linq;

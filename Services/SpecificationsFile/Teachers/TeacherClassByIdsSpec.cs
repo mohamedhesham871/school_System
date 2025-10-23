@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Services.SpecificationsFile
+namespace Services.SpecificationsFile.Teachers
 {
     public sealed class TeacherClassByIdsSpec : Specifications<TeacherClass>
     {

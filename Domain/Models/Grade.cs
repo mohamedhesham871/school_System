@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Domain.Models.User;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,5 +18,6 @@ namespace Domain.Models
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         //Relation with Subject 1:M
         public ICollection<Subject> Subjects { get; set; } = [];
+        public ICollection<Students> Students { get; set; } = [];
     }
 }

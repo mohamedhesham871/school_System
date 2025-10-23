@@ -7,6 +7,7 @@ using Domain.Models.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Services.SpecificationsFile;
+using Services.SpecificationsFile.Lessons;
 using Shared;
 using Shared.Lesson_Dto;
 using Shared.QuizDto;

@@ -3,6 +3,7 @@ using Domain.Models.User;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Shared.IdentityDtos;
+using Shared.IdentityDtos.Admin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,28 +16,39 @@ namespace Services.Profiles
     {
         public UsersProfile()
         {
+
             /*1*/
-            CreateMap<RegisterStudentDto, Students>().
+            CreateMap<CreateStudentDto, Students>().
+            ForMember(dest => dest.Status, src => src.MapFrom(opt => opt.Status.ToString())).
+            ForMember(dest => dest.Gender, src => src.MapFrom(opt => opt.gender.ToString()));
+
+            CreateMap<UpdateStudentDto, Students>().
             ForMember(dest => dest.Status, src => src.MapFrom(opt => opt.Status.ToString())).
             ForMember(dest => dest.Gender, src => src.MapFrom(opt => opt.gender.ToString()));
 
 
             /*2*/
-            CreateMap<Students, RegisterStudentDto>().
+            CreateMap<Students, CreateStudentDto>().
+             ForMember(dest => dest.Status, src => src.MapFrom(opt => Enum.Parse<StudentState>(opt.Status)))
+            .ForMember(dest => dest.gender, src => src.MapFrom(opt => Enum.Parse<Gender>(opt.Gender)));
+            
+            CreateMap<Students, UpdateStudentDto>().
              ForMember(dest => dest.Status, src => src.MapFrom(opt => Enum.Parse<StudentState>(opt.Status)))
             .ForMember(dest => dest.gender, src => src.MapFrom(opt => Enum.Parse<Gender>(opt.Gender)));
 
 
             /*3*/
-            CreateMap<NewTeacherDto, Teacher>().
+            CreateMap<CreateTeacherDto, Teacher>().
            ForMember(dest => dest.Status, src => src.MapFrom(opt => opt.Status.ToString()))
           .ForMember(dest => dest.Gender, src => src.MapFrom(opt => opt.gender.ToString()));
 
 
             /*4*/
-            CreateMap<Teacher, NewTeacherDto>().
-            ForMember(dest => dest.Status, src => src.MapFrom(opt => Enum.Parse<TeacherState>(opt.Status)))
+            CreateMap<Teacher, CreateTeacherDto>().
+            ForMember(dest => dest.Status, src => src.MapFrom(opt => Enum.Parse<UserState>(opt.Status)))
            .ForMember(dest => dest.gender, src => src.MapFrom(opt => Enum.Parse<Gender>(opt.Gender)));
+
+
 
             /*5*/
             CreateMap<Teacher, UserProfileDto>()

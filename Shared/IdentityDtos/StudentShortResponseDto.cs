@@ -6,10 +6,7 @@ using System.Threading.Tasks;
 
 namespace Shared.IdentityDtos
 {
-    public  enum TeacherState
+    public  class StudentShortResponseDto
     {
-        Active,
-        Inactive,
-        Resigned
     }
 }

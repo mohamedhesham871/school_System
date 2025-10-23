@@ -7,17 +7,17 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Services.SpecificationsFile
+namespace Services.SpecificationsFile.Lessons
 {
-    public  class LessonSpecCount:Specifications<Lesson>
+    public class LessonSpecCount : Specifications<Lesson>
     {
         public LessonSpecCount(Subject_LessonFilteration f, int id, bool OnlyActive = false)
-            : base(Criteria(f, id,OnlyActive))
+            : base(Criteria(f, id, OnlyActive))
         {
         }
         public LessonSpecCount()
         {
-            
+
         }
 
         private static Expression<Func<Lesson, bool>> Criteria(Subject_LessonFilteration f, int id, bool OnlyActive = false)
@@ -26,9 +26,9 @@ namespace Services.SpecificationsFile
 
             return s =>
                 s.SubjectId == id &&
-                (!OnlyActive || s.IsActive) && 
+                (!OnlyActive || s.IsActive) &&
                 (string.IsNullOrEmpty(search) ||
-                 (s.Title != null && s.Title.ToLower().Contains(search)));
+                 s.Title != null && s.Title.ToLower().Contains(search));
         }
     }
 }

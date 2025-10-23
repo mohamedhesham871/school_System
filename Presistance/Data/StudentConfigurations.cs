@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 
 namespace Persistence.Data
 {
-    public class UserConfigurations : IEntityTypeConfiguration<Students>
+    public class StudentConfigurations : IEntityTypeConfiguration<Students>
     {
         public void Configure(EntityTypeBuilder<Students> builder)
         {
-           builder.Property(s=>s.EnrollmentDate).IsRequired().HasColumnType("date");
+           builder.Property(s=>s.AssignToSchool).IsRequired().HasColumnType("date");
             builder.Property(s => s.Status)
                     .IsRequired()
                     .HasMaxLength(20)
@@ -22,12 +22,19 @@ namespace Persistence.Data
             builder.Property(s => s.ParentContact)
                     .IsRequired()
                     .HasMaxLength(11); // Assuming a max length for contact number
+           
             //Later Want to Add Relation with Grade and Class
-        //    builder.HasOne<AppUsers>()
-        //           .WithMany()
-        //           .HasForeignKey(s => s.Id) // Assuming Id is the foreign key
-        //           .OnDelete(DeleteBehavior.SetNull); // Adjust delete behavior as needed
-        //
+            builder.HasOne(s=>s.Grade)
+                   .WithMany(g => g.Students)
+                   .HasForeignKey(s => s.GradeID)
+                   .OnDelete(DeleteBehavior.NoAction);
+            //Class Relation
+            builder.HasOne(s => s.Class)
+                   .WithMany(c => c.Students)
+                   .HasForeignKey(s => s.ClassID)
+                   .OnDelete(DeleteBehavior.NoAction);
+            //Relation  With Subject In Table M:M [StudentAssignInSubject]
+           
         }
     }
 }

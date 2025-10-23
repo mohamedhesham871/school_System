@@ -6,34 +6,33 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-
-namespace Services.SpecificationsFile
+namespace Services.SpecificationsFile.Teachers
 {
-    public  class TeacherSpecificationWithClassAndSubjects:Specifications<Teacher>
+    public class TeacherSpecificationWithClassAndSubjects : Specifications<Teacher>
     {
 
         //Get By   Id With Class And Subjects
-        public TeacherSpecificationWithClassAndSubjects(string TeacherId):base(t => t.Id == TeacherId)
+        public TeacherSpecificationWithClassAndSubjects(string TeacherId) : base(t => t.Id == TeacherId)
         {
             AddInclude(t => t.TeacherClasses!);
             AddInclude(t => t.Subjects!);
         }
 
-        public TeacherSpecificationWithClassAndSubjects(TeacherFilteration teacherFilteration)
+        public TeacherSpecificationWithClassAndSubjects(USerFilteration teacherFilteration)
         {
-            AddInclude(t=>t.Subjects!);
+            AddInclude(t => t.Subjects!);
             AddInclude(t => t.TeacherClasses!);
             //sorting 
             Sorting(teacherFilteration);
-            
-           if(teacherFilteration.PageSize>0 && teacherFilteration.PageIndex>0)
+
+            if (teacherFilteration.PageIndex > 0)
             {
-                ApplyPaging(teacherFilteration.PageIndex, teacherFilteration.PageSize);
+                ApplyPaging(teacherFilteration.PageIndex,15);
             }
         }
         //For Searching By name Or UserName Or Filtering By SubjectId Or ClassId and Counting
-       
-        private void Sorting(TeacherFilteration teacherFilteration)
+
+        private void Sorting(USerFilteration teacherFilteration)
         {
             switch (teacherFilteration.Sorting)
             {

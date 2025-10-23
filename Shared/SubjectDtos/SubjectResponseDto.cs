@@ -16,7 +16,7 @@ namespace Shared.SubjectDtos
         public string SubjectCode { get; set; } = null!;
         public string Description { get; set; } = string.Empty;
 
-        public TeacherShortResponse? Teacher { get; set; } // Navigation property to Teacher
+        public TeacherShortResponseDto? Teacher { get; set; } // Navigation property to Teacher
         public GradeResponseShortDto Grade { get; set; } = null!; // Navigation property to Grade
         public List<LessonShortResponseDto?> Lessons { get; set; } = new();
 

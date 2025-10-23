@@ -52,6 +52,23 @@ namespace Persistence.Contexts
                  .OnDelete(DeleteBehavior.Cascade);
             });
             base.OnModelCreating(Builder);
+
+            //Releation Between Student And Subject M:N Will Generate New Table [StudentAssignInSubject]
+            Builder.Entity<StudentAssignInSubject>(e =>
+            {
+                e.ToTable("StudentAssignInSubject");
+                e.HasKey(x => new { x.StudentId, x.SubjectId });
+
+                e.HasOne(x => x.Student)
+                 .WithMany(s => s.StudentAssignInSubjects)
+                 .HasForeignKey(x => x.StudentId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasOne(x => x.Subject)
+                 .WithMany(su => su.StudentAssignInSubjects)
+                 .HasForeignKey(x => x.SubjectId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
             // Additional configurations can be added here if needed
         }
 
@@ -60,7 +77,7 @@ namespace Persistence.Contexts
         public DbSet<Grade> Grades { get; set; } = null!;
         public DbSet<Subject> Subjects { get; set; } = null!;
         public DbSet<Lesson> Lessons { get; set; } = null!;
-        public DbSet<StudentClass> StudentClasses { get; set; } = null!;
+        public DbSet<ClassEntity> StudentClasses { get; set; } = null!;
         public DbSet<Question> Questions { get; set; }
         public DbSet<Quiz> Quizzes { get; set; } = null!;
         public DbSet<Answer> Answers { get; set; } = null!;

@@ -8,15 +8,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Services.SpecificationsFile
+namespace Services.SpecificationsFile.Lessons
 {
-    public class LessonInSubjectSpecification:Specifications<Lesson>
+    public class LessonInSubjectSpecification : Specifications<Lesson>
     {
         public LessonInSubjectSpecification()
         {
-            
+
         }
-        public LessonInSubjectSpecification(string code):base(l=>l.Code==code)
+        public LessonInSubjectSpecification(string code) : base(l => l.Code == code)
         {
             AddInclude(l => l.Subject!);
             AddInclude(l => l.quiz!);
@@ -24,7 +24,7 @@ namespace Services.SpecificationsFile
         public LessonInSubjectSpecification(Subject_LessonFilteration subjectFilteration, int subjectId, bool OnlyActive = false)
             : base(l => l.SubjectId == subjectId && (OnlyActive ? l.IsActive : true))
         {
-            
+
             AddInclude(t => t.Subject!);
             AddInclude(t => t.quiz!);
             //sorting 
@@ -34,9 +34,9 @@ namespace Services.SpecificationsFile
             {
                 ApplyPaging(subjectFilteration.PageIndex, subjectFilteration.PageSize);
             }
-        } 
+        }
         //For Teacher to have Access to all Lesson Active or Not 
-      
+
 
         private void Sorting(Subject_LessonFilteration LessonFilteration)
         {

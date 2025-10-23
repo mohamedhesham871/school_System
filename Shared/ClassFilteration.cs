@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shared.IdentityDtos
+namespace Shared
 {
-    public  class ForgetPasswordDto
+    public  class ClassFilteration
     {
-        public string Email { get; set; } = string.Empty;
     }
 }

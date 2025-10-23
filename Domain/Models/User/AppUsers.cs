@@ -19,6 +19,5 @@ namespace Domain.Models.User
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public List<RefresTokens?> RefresTokens { get; set; }
 
-
     }
 }

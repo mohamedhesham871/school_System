@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shared.IdentityDtos
+namespace Shared.IdentityDtos.Auth
 {
     public class LoginUserDto
     {

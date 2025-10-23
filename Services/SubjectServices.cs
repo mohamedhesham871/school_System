@@ -5,6 +5,7 @@ using Domain.Models;
 using Domain.Models.User;
 using Microsoft.Extensions.Logging;
 using Services.SpecificationsFile;
+using Services.SpecificationsFile.Subjects;
 using Shared;
 using Shared.IdentityDtos;
 using Shared.SubjectDtos;
@@ -113,7 +114,7 @@ namespace Services
                     AcademicYear = subject.Grade.AcademicYear
 
                 },
-                Teacher = subject.Teacher == null ? null : new TeacherShortResponse
+                Teacher = subject.Teacher == null ? null : new TeacherShortResponseDto
                 {
                     FirstName = subject.Teacher.FirstName,
                     UserName = subject.Teacher.UserName,

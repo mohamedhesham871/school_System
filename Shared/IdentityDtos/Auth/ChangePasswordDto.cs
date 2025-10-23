@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shared.IdentityDtos
+namespace Shared.IdentityDtos.Auth
 {
-    public  class ChangePasswordDto
+    public class ChangePasswordDto
     {
         [Required]
         public string OldPassword { get; set; } = string.Empty;

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Domain.Models.User;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -12,13 +13,16 @@ namespace Shared.IdentityDtos
     {
         public string? FirstName { get; set; } = null!;
         public string? LastName { get; set; } = null!;
+        public string? Email { get; set; } = null!;
         public string? UserName { get; set; } = null!;
         public string? PhoneNumber { get; set; } = null!;
         public string? Address { get; set; } = null!;
         public IFormFile? ProfileImage { get; set; }
         public string? Specialization { get; set; } = null!;
-        public TeacherState? Status { get; set; }
-        public ICollection<int>? AssignedSubjects { get; set; } = [];
-        public ICollection<int>? AssignedClasses { get; set; } = [];
+        public UserState? Status { get; set; }
+        public DateTime ?HiringDate { get; set; }
+        public DateTime? DateOfBirth { get; set; }
+        public Gender? Gender { get; set; } = null!;
+
     }
 }

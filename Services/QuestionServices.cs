@@ -1,4 +1,5 @@
 ﻿using AbstractionServices;
+using AutoMapper.Configuration.Annotations;
 using Domain.Contract;
 using Domain.Exceptions;
 using Domain.Models;
@@ -6,6 +7,7 @@ using Domain.Models.subject_Lesson;
 using Domain.Models.User;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Services.SpecificationsFile.Questions;
 using Shared;
 using Shared.QuizDto;
 using System;
@@ -138,17 +140,63 @@ namespace Services
 
         }
         //Get Question By Code
-        public Task<QuestionDto> GetQuestionByCode(string questionCode)
+        public async Task<QuestionDto> GetQuestionByCode(string questionCode)
         {
-            throw new NotImplementedException();
+          //check Question Code 
+          var question = await _unitOfWork.GetRepository<Question, int>().GetEntityWithCode<Question>(questionCode);
+            if (question is null) throw new NotFoundException("Question not found ,Try Valied Question");
+
+            //map to dto
+            var questionDto = new QuestionDto
+            {
+                QuestionCode = question.Code,
+                QuestionText = question.QuestionText,
+                QuestionType = question.QuestionType,
+                Points = question.Points,
+                Answers = question.Answers?.Select(a => new AnswerDtoResponse
+                {
+                    AnswerCode = a.Code,
+                    AnswerText = a.AnswerText,
+                    IsCorrect = a.IsCorrect
+                }).ToList()
+            };
+            return questionDto;
         }
 
-        public Task<PaginationResponse<QuestionDto>> GetAllQuestions(string QuizCode)
+        public async  Task<PaginationResponse<QuestionDto>> GetAllQuestions(string QuizCode ,int IndexPage)
         {
-            throw new NotImplementedException();
+            // check on quiz code 
+            var Quiz  = await _unitOfWork.GetRepository<Quiz, int>().GetEntityWithCode<Quiz>(QuizCode);
+            if (Quiz is null) throw new NotFoundException("Quiz not found ,Try Valied Quiz");
+
+            var spec = new QuestionSpec(Quiz.QuizId, IndexPage);
+            var QuestionSpec = await _unitOfWork.GetRepository<Question, int>().GetByConditionAsync(spec);
+            var totalCount = await _unitOfWork.GetRepository<Question, int>().CountAsync(spec);
+            //map to dto
+            return new PaginationResponse<QuestionDto> {
+                Data = QuestionSpec.Select(question => new QuestionDto
+                {
+                    QuestionCode = question.Code,
+                    QuestionText = question.QuestionText,
+                    QuestionType = question.QuestionType,
+                    Points = question.Points,
+                    Answers = question.Answers?.Select(a => new AnswerDtoResponse
+                    {
+                        AnswerCode = a.Code,
+                        AnswerText = a.AnswerText,
+                        IsCorrect = a.IsCorrect
+                    }).ToList()
+                }).ToList(),
+                Total = totalCount,
+                Skip = IndexPage,
+                Take = 5
+            };
+
+
+
         }
 
-       
-      
+
+
     }
 }

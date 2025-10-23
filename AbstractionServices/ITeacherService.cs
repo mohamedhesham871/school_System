@@ -10,10 +10,10 @@ namespace AbstractionServices
 {
     public  interface ITeacherService
     {
-        Task<string> AddTeacherAsync(NewTeacherDto teacher);
-        Task UpdateTeacherAsync(string teacherId, UpdateTeacherDto teacher);
-        Task<bool> DeleteTeacherAsync(string teacherId);
-        Task<PaginationResponse<TeacherResultDto>> GetAllTeachersAsync(TeacherFilteration teacherFilteration);
+        //Task<string> AddTeacherAsync(NewTeacherDto teacher);
+        //Task UpdateTeacherAsync(string teacherId, UpdateTeacherDto teacher);
+        //Task<bool> DeleteTeacherAsync(string teacherId);
+        //Task<PaginationResponse<TeacherResultDto>> GetAllTeachersAsync(USerFilteration teachsererFilteration);
         Task<TeacherResultDto?> GetTeacherByIdAsync(string teacherId);
         Task<TeacherResultDto?> FindTeacherByEmailAsync(string email);
 

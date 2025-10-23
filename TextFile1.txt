@@ -1,0 +1,78 @@
+﻿📌 Users (Common)
+Api/Users/GetAll
+
+Api/Users/GetById/{id}
+
+Api/Users/Update/{id}
+
+Api/Users/Delete/{id}
+
+Api/Users/AssignRole
+
+Api/Users/RemoveRole
+
+- `GET /Api/Admin/Dashboard` - Get admin dashboard statistics
+- `GET /Api/Admin/Profile` - Get admin profile
+- `PUT /Api/Admin/Profile` - Update admin profile
+- `GET /Api/Admin/Users` - Get all users (paginated)
+- `GET /Api/Admin/Users/{id}` - Get user by ID
+- `PUT /Api/Admin/Users/{id}/Status` - Activate/Deactivate user
+- `DELETE /Api/Admin/Users/{id}` - Delete user
+- `GET /Api/Admin/Analytics` - Get system analytics
+- `GET /Api/Admin/Reports` - Generate system reports
+                                       Done
+
+📌 Teacher
+Api/Teacher/Create
+
+Api/Teacher/GetAll
+
+Api/Teacher/GetById/{id}
+
+Api/Teacher/Update/{id}
+
+Api/Teacher/Delete/{id}
+
+Api/Teacher/GetClasses/{teacherId}
+
+Api/Teacher/GetSubjects/{teacherId}
+
+📌 Student
+Api/Student/Create
+
+Api/Student/GetAll
+
+Api/Student/GetById/{id}
+
+Api/Student/Update/{id}
+
+Api/Student/Delete/{id}
+
+Api/Student/EnrollClass/{classId}
+
+Api/Student/GetClasses/{studentId}
+
+Api/Student/GetSubjects/{studentId}
+
+
+## 2. User Management APIs
+### Admin
+
+
+### Teacher
+- `GET /Api/Teacher/Dashboard` - Get teacher dashboard
+- `GET /Api/Teacher/Q` - Get teacher profile
+- `PUT /Api/Teacher/Profile` - Update teacher profile
+- `GET /Api/Teacher/MyClasses` - Get assigned classes
+- `GET /Api/Teacher/MySubjects` - Get assigned subjects
+- `GET /Api/Teacher/Schedule` - Get teaching schedule
+- `GET /Api/Teacher/Students` - Get all students in teacher's classes
+
+### Student
+- `GET /Api/Student/Dashboard` - Get student dashboard
+- `GET /Api/Student/Profile` - Get student profile
+- `PUT /Api/Student/Profile` - Update student profile
+- `GET /Api/Student/MyClasses` - Get enrolled classes
+- `GET /Api/Student/MySubjects` - Get enrolled subjects
+- `GET /Api/Student/Schedule` - Get class schedule
+- `GET /Api/Student/Grades` - Get all grades/results

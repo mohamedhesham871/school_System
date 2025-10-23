@@ -28,6 +28,7 @@ namespace Domain.Models
         #endregion
         //there is Relation with Lesson 1:M so FK in Lesson Table
         public ICollection<Lesson?> Lessons { get; set; } = [];
+        public ICollection<StudentAssignInSubject> StudentAssignInSubjects { get; set; } = [];
     }
 }
 
