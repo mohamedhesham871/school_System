@@ -9,7 +9,6 @@ namespace Shared
 {
     public class ClassCreateOrUpdate
     {
-        public string ClassCode { get; set; } = string.Empty;
         public string ClassName { get; set; } = string.Empty;
         public int GradeID { get; set; } 
       

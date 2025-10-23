@@ -1,6 +1,7 @@
 ﻿using AbstractionServices;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Shared;
 using Shared.IdentityDtos;
 using Shared.IdentityDtos.Admin;
 using System;
@@ -130,6 +131,42 @@ namespace Presentation.Controllers
             var result = await services.RemoveTeacherFromSubject(TeacherId, SubjectCode);
             return Ok(result);
         }
-        //
+        //Add New ClassEntity
+        [HttpPost("AddClass/{GradeId}")]
+        public async Task<IActionResult> AddClass([FromRoute] string GradeCode, [FromBody] ClassCreateOrUpdate create)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await services.AddClass(GradeCode, create);
+            return Ok(result);
+        }
+
+        //Update ClassEntity
+        [HttpPatch("UpdateClass/{ClassCode}")]
+        public async Task<IActionResult> UpdateClass([FromRoute] string ClassCode, [FromBody] ClassCreateOrUpdate update)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await services.UpdateClass(ClassCode, update);
+            return Ok(result);
+        }
+        //Delete ClassEntity
+        [HttpDelete("DeleteClass/{ClassCode}")]
+        public async Task<IActionResult> DeleteClass([FromRoute] string ClassCode)
+        {
+            var result = await services.DeleteClass(ClassCode);
+            return Ok(result);
+        }
+
+        //Class Details
+        [HttpGet("ClassDeatils/{classCode}")]
+        public async Task<IActionResult> ClassDetials([FromRoute]string  classcode)
+        {
+            var res= await services.classDetialsResponseDto(classcode);
+            return Ok(res);
+        }
+
     }
 }

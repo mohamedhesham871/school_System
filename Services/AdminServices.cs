@@ -10,11 +10,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Services.SpecificationsFile.Teachers;
 using Shared;
+using Shared.GradeDtos;
 using Shared.IdentityDtos;
 using Shared.IdentityDtos.Admin;
 using Shared.SubjectDtos;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -674,35 +676,145 @@ namespace Services
 
 
 
+        #region Class Management
 
-
-        public Task<string> UpdateClass(string ClassCode, ClassCreateOrUpdate update, string GradeCode)
+        public async Task<GenericResponseDto> AddClass(int GradeId, ClassCreateOrUpdate create)
         {
-            throw new Exception("Not Implemented");
+            try
+            {
+                //Validate Input
+                var grade = await _unitOfWork.GetRepository<Grade, int>().GetByIdAsync(GradeId);
+                if (grade is null)
+                    throw new NotFoundException($"Grade with ID {GradeId} not found.");
+                //Create New Class
+                var classEntity = new ClassEntity
+                {
+                    ClassName = create.ClassName,
+                    GradeID = GradeId
+                };
+                _unitOfWork.GetRepository<ClassEntity, string>().AddAsync(classEntity);
+                var res = await _unitOfWork.SaveChanges();
+                if (res <= 0)
+                    throw new BadRequestException("Failed to create new Class.");
+                return new GenericResponseDto() { IsSuccess = true, Message = "Class Created Successfully" };
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while Add New Class ");
+                return new GenericResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
         }
 
-
-        public Task<string> AddClass(string GradeCode, ClassCreateOrUpdate create)
+        public async Task<GenericResponseDto> UpdateClass(string ClassCode, ClassCreateOrUpdate update)
         {
-            throw new NotImplementedException();
+            try
+            {
+                //Validate Input
+                if (string.IsNullOrEmpty(ClassCode))
+                    throw new NullReferenceException("ClassCode cannot be null or empty.");
+
+                var classEntity = await _unitOfWork.GetRepository<ClassEntity, string>().GetEntityWithCode<ClassEntity>(ClassCode);
+                if (classEntity is null)
+                    throw new NotFoundException($"Class with Code {ClassCode} not found.");
+
+                //Update Class Data
+                classEntity.ClassName = update.ClassName ?? classEntity.ClassName;
+                classEntity.UpdateAt = DateTime.UtcNow;
+                var res = await _unitOfWork.SaveChanges();
+                if (res <= 0)
+                    throw new BadRequestException("Failed to update Class.");
+                return new GenericResponseDto()
+                {
+                    IsSuccess = true,
+                    Message = "Class Updated Successfully"
+                };
+
+
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while Update Class ");
+                return new GenericResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
         }
+
+        public async Task<GenericResponseDto> DeleteClass(string ClassCode)
+        {
+            try
+            {
+                //Validate Input
+                if (string.IsNullOrEmpty(ClassCode))
+                    throw new NullReferenceException("ClassCode cannot be null or empty.");
+                var classEntity = await _unitOfWork.GetRepository<ClassEntity, string>().GetEntityWithCode<ClassEntity>(ClassCode);
+                if (classEntity is null)
+                    throw new NotFoundException($"Class with Code {ClassCode} not found.");
+                //Delete Class
+                _unitOfWork.GetRepository<ClassEntity, string>().DeleteAsync(classEntity);
+                var res = await _unitOfWork.SaveChanges();
+                if (res <= 0)
+                    throw new BadRequestException("Failed to delete Class.");
+                return new GenericResponseDto() { IsSuccess = true, Message = "Class Deleted Successfully" };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while Delete Class ");
+                return new GenericResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<ClassDetialsResponseDto> classDetialsResponseDto(string ClassCode)
+        {
+            try
+            {
+                //Validate Input
+                if (string.IsNullOrEmpty(ClassCode))
+                    throw new NullReferenceException("ClassCode cannot be null or empty.");
+                var classEntity = await _unitOfWork.GetRepository<ClassEntity, string>().GetEntityWithCode<ClassEntity>(ClassCode);
+               
+                if(classEntity is null)
+                    throw new NotFoundException($"Class with Code {ClassCode} not found.");
+                var Response = new ClassDetialsResponseDto()
+                {
+                    ClassCode = classEntity.Code,
+                    ClassName = classEntity.ClassName,
+                    GradeResponseShortDto = new GradeResponseShortDto()
+                    {
+                        GradeCode = classEntity.Grade.GradeCode,
+                        GradeName = classEntity.Grade.GradeName,
+                        AcademicYear = classEntity.Grade.AcademicYear
+                    }
+                };
+                return Response;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while Get Class Details By Code ");
+                throw;
+            }
+        }
+
+        #endregion
+
 
         public Task<AdminDashboardDto> adminDashboardDto()
         {
             throw new NotImplementedException();
         }
-
-        public Task<ClassDetialsResponseDto> classDetialsResponseDto(string ClassCode)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<string> DeleteClass(string ClassCode)
-        {
-            throw new NotImplementedException();
-        }
-
-      
 
         public Task<AdminProfileDto> getAdminProfile(string UserId)
         {
@@ -788,5 +900,7 @@ namespace Services
             }
             return images;
         }
+
+       
     }
 }
