@@ -7,6 +7,7 @@ using Domain.Models.User;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using Services.SpecificationsFile.Teachers;
 using Shared;
 using Shared.IdentityDtos;
@@ -82,7 +83,7 @@ namespace Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while Add New Student ");
-                throw;
+                return new GenericResponseDto() { IsSuccess = false, Message = ex.Message };
             }
         }
 
@@ -132,7 +133,7 @@ namespace Services
             }
             catch(Exception ex) {
                 _logger.LogError(ex,"Error while Add New Teacher ");
-                throw;
+                return new GenericResponseDto() { Message=ex.Message,IsSuccess= false };
             }
         }
      
@@ -155,7 +156,7 @@ namespace Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while Deleting User ");
-                throw;
+                return new GenericResponseDto() { IsSuccess=false, Message=ex.Message };
             }
         }
        
@@ -236,7 +237,7 @@ namespace Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while Updating Student ");
-                throw;
+               return new GenericResponseDto() { IsSuccess = false  ,Message=ex.Message};
             }
         }
 
@@ -302,7 +303,7 @@ namespace Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while Updating Teacher ");
-                throw;
+                return new GenericResponseDto() { IsSuccess = false, Message = ex.Message };
             }
         }
 
@@ -337,43 +338,336 @@ namespace Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error while Assign Student To Class ");
-                throw;
+                return new GenericResponseDto() { IsSuccess = false, Message = ex.Message };
             }
         }
 
-
-        public Task<GenericResponseDto> AssingStudentToSubject(string StudentId, string SubjectCode)
+        public async Task<GenericResponseDto> AssingStudentToSubject(string StudentId, string SubjectCode)
         {
-            throw new NotImplementedException();
+            try
+            {
+                //Validate Input
+                if (string.IsNullOrEmpty(StudentId) || string.IsNullOrEmpty(SubjectCode))
+                    throw new BadRequestException("StudentId Or SubjectCode cannot be null or empty.");
+                //Check On Student Exist
+                var student = await _unitOfWork.GetRepository<Students, string>().GetByIdAsync(StudentId);
+                if (student == null)
+                    throw new NotFoundException($"Student with ID {StudentId} not found.");
+                //Check On User Role AS Stuedent
+                var isStudent = await _userManager.IsInRoleAsync(student, "Student");
+                if (!isStudent)
+                    throw new BadRequestException($"User with ID {StudentId} is not a Student.");
+                //Check On Subject Exist
+                var subject = await _unitOfWork.GetRepository<Subject, int>().GetEntityWithCode<Subject>(SubjectCode);
+                if (subject is null)
+                    throw new NotFoundException($"Subject with Code {SubjectCode} not found.");
+                //Check On Student Already Assigned In Subject
+                var assignment = await _unitOfWork.GetRepository<StudentAssignInSubject, (string, int)>()
+                    .GetByIdAsync((StudentId, subject.SubjectID));
+                if (assignment != null)
+                    throw new BadRequestException($"Student with ID {StudentId} is already assigned to Subject {SubjectCode}.");
+                //Create New Assignment
+                var studentAssignInSubject = new StudentAssignInSubject
+                {
+                    StudentId = StudentId,
+                    SubjectId = subject.SubjectID,
+                    SubjectName = subject.SubjectName,
+                    UserName = student.UserName!
+                };
+                //Assign Student to Subject
+                _unitOfWork.GetRepository<StudentAssignInSubject, (string, int)>().AddAsync(studentAssignInSubject);
+
+                var res= await _unitOfWork.SaveChanges();
+                
+                var Response = new GenericResponseDto();
+                if (res <= 0)
+                    throw new BadRequestException("Failed to assign Student to Subject.");
+               
+                    Response.IsSuccess = true;
+                    Response.Message = "Student assigned to Subject successfully.";
+                
+                return Response;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while Assign Student To Subject ");
+                return new GenericResponseDto() { IsSuccess = false ,Message =ex.Message };
+            }
         }
 
-        public Task<GenericResponseDto> AssignTeacherToClass(string TeacherId, string ClassCode)
+        public async Task<GenericResponseDto> AssignTeacherToClass(string TeacherId, string ClassCode)
         {
-            throw new NotImplementedException();
+            try
+            {
+                //Validate Input
+                if (string.IsNullOrEmpty(TeacherId) || string.IsNullOrEmpty(ClassCode))
+                    throw new BadRequestException("TeacherId Or ClassCode cannot be null or empty.");
+                //Check On Teacher Exist
+                var teacher = await _unitOfWork.GetRepository<Teacher, string>().GetByIdAsync(TeacherId);
+                if (teacher == null)
+                    throw new NotFoundException($"Teacher with ID {TeacherId} not found.");
+                //Check On User Role AS Teacher
+                var isTeacher = await _userManager.IsInRoleAsync(teacher, "Teacher");
+                if (!isTeacher)
+                    throw new BadRequestException($"User with ID {TeacherId} is not a Teacher.");
+                //Check On Class Exist
+                var classEntity = await _unitOfWork.GetRepository<ClassEntity, string>().GetEntityWithCode<ClassEntity>(ClassCode);
+                if(classEntity is null) throw new NotFoundException("Class with Code {ClassCode} not found.");
+
+                //Check On Teacher Already Assigned In Class
+                 var TeacherClassAssignment = await _unitOfWork.GetRepository<TeacherClass, (string, int)>()
+                    .GetByIdAsync((TeacherId, classEntity.ClassID));
+                if (TeacherClassAssignment != null)
+                    throw new BadRequestException($"Teacher with ID {TeacherId} is already assigned to Class {ClassCode}.");
+                //Create New Assignment
+                var teacherClass = new TeacherClass
+                {
+                    TeacherId = TeacherId,
+                    ClassID = classEntity.ClassID
+                };
+                //Assign Teacher to Class
+                _unitOfWork.GetRepository<TeacherClass, (string, int)>().AddAsync(teacherClass);
+               
+                var res = await _unitOfWork.SaveChanges();
+
+                var response = new GenericResponseDto();
+                if (res <= 0)
+                throw new BadRequestException("Failed to assign Teacher to Class.");
+               
+                    response.IsSuccess = true;
+                    response.Message = "Teacher assigned to Class successfully.";
+                
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while Assign Teacher To Class ");
+                return new GenericResponseDto()
+                { IsSuccess = false,
+                    Message = "Failed to assign Teacher to Class." };
+
+            }
         }
 
-        public Task<GenericResponseDto> AssingTeacherToSubject(string TeacherId, string SubjectCode)
+        public async  Task<GenericResponseDto> AssingTeacherToSubject(string TeacherId, string SubjectCode)
         {
-            throw new NotImplementedException();
-        }
-        public Task<GenericResponseDto> RemoveStudentFromClass(string StudentId, string ClassCode)
-        {
-            throw new NotImplementedException();
+            try
+            {
+                //validate Input
+                if (string.IsNullOrEmpty(TeacherId) || string.IsNullOrEmpty(SubjectCode))
+                    throw new BadRequestException("TeacherId Or SubjectCode cannot be null or empty.");
+                //Check On Teacher Exist
+                var teacher = await _unitOfWork.GetRepository<Teacher, string>().GetByIdAsync(TeacherId);
+                if (teacher == null)
+                    throw new NotFoundException($"Teacher with ID {TeacherId} not found.");
+                //Check On User Role AS Teacher
+                var isTeacher = await _userManager.IsInRoleAsync(teacher, "Teacher");
+                if (!isTeacher)
+                    throw new BadRequestException($"User with ID {TeacherId} is not a Teacher.");
+                //Check On Subject Exist
+                var subject = await _unitOfWork.GetRepository<Subject, int>().GetEntityWithCode<Subject>(SubjectCode);
+                if (subject is null)
+                    throw new NotFoundException($"Subject with Code {SubjectCode} not found.");
+                //Check On Teacher Already Assigned In Subject
+                if(teacher.Subjects.Contains(subject))
+                    throw new BadRequestException("$Teacher with ID {TeacherId} is already assigned to Subject {SubjectCode}.");
+                //Create New Assignment
+                teacher.Subjects.Add(subject);
+                var res = await _userManager.UpdateAsync(teacher);
+                if (!res.Succeeded)
+                {
+                    var errors = res.Errors.Select(e => e.Description);
+                    throw new ValidationErrorsExecption(errors);
+                }
+                return new GenericResponseDto()
+                {
+                    IsSuccess = true,
+                    Message = "Teacher assigned to Subject successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while Assign Teacher To Subject ");
+                return new GenericResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
         }
 
-        public Task<GenericResponseDto> RemoveStudentFromSubject(string StudentId, string SubjectCode)
+        public async Task<GenericResponseDto> RemoveStudentFromClass(string StudentId, string ClassCode)
         {
-            throw new NotImplementedException();
+            try
+            {
+                //validate Input
+                if (string.IsNullOrEmpty(StudentId) || string.IsNullOrEmpty(ClassCode))
+                    throw new BadRequestException("StudentId Or ClassCode cannot be null or empty.");
+                //Check On Student Exist
+                var AssignStudentInClass = await _unitOfWork.GetRepository<Students, string>().GetByIdAsync(StudentId);
+                if (AssignStudentInClass == null)
+                    throw new NotFoundException($"Student with ID {StudentId} not found.");
+                //Check On User Role AS Stuedent
+                var isStudent = await _userManager.IsInRoleAsync(AssignStudentInClass, "Student");
+                if (!isStudent)
+                    throw new BadRequestException($"User with ID {StudentId} is not a Student.");
+                //Check On Class Exist
+                var classEntity = await _unitOfWork.GetRepository<ClassEntity, string>().GetEntityWithCode<ClassEntity>(ClassCode);
+                if (classEntity is null) throw new NotFoundException($"Class with Code {ClassCode} not found.");
+                //Check On Student Assigned In Class
+                if(AssignStudentInClass.ClassID != classEntity.ClassID)
+                    throw new BadRequestException($"Student with ID {StudentId} is not assigned to Class {ClassCode}.");
+                //Remove Student From Class
+                AssignStudentInClass.ClassID = null;
+                var res = await _userManager.UpdateAsync(AssignStudentInClass);
+                if (!res.Succeeded)
+                {
+                    var errors = res.Errors.Select(e => e.Description);
+                    throw new ValidationErrorsExecption(errors);
+                }
+                return new GenericResponseDto()
+                {
+                    IsSuccess = true,
+                    Message = "Student removed from Class successfully."
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while Remove Student From Class ");
+                return new GenericResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+
+            }
         }
 
-        public Task<GenericResponseDto> RemoveTeacherFromClass(string TeacherId, string ClassCode)
+        public async Task<GenericResponseDto> RemoveStudentFromSubject(string StudentId, string SubjectCode)
         {
-            throw new NotImplementedException();
+            try
+            {
+                //validate Input
+                if (string.IsNullOrEmpty(StudentId) || string.IsNullOrEmpty(SubjectCode))
+                    throw new BadRequestException("StudentId Or SubjectCode cannot be null or empty.");
+                
+                //Check On Subject Exist
+                var subject = await _unitOfWork.GetRepository<Subject, int>().GetEntityWithCode<Subject>(SubjectCode);
+                if (subject is null)
+                    throw new NotFoundException($"Subject with Code {SubjectCode} not found.");
+                //Check On Student Assigned In Subject
+                var assignment = await _unitOfWork.GetRepository<StudentAssignInSubject, (string, int)>()
+                    .GetByIdAsync((StudentId, subject.SubjectID));
+                if (assignment == null) throw new NotFoundException($"Student with ID {StudentId} is not assigned to Subject {SubjectCode}.");
+                //Remove Student From Subject
+                _unitOfWork.GetRepository<StudentAssignInSubject, (string, int)>().DeleteAsync(assignment);
+                var res = await _unitOfWork.SaveChanges();
+                if(res<=0)
+                    throw new BadRequestException("Failed to remove Student from Subject.");
+                return new GenericResponseDto()
+                {
+                    IsSuccess = true,
+                    Message = "Student removed from Subject successfully."
+                };
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while Remove Student From Subject ");
+                return new GenericResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
+        }
+      
+        public async Task<GenericResponseDto> RemoveTeacherFromClass(string TeacherId, string ClassCode)
+        {
+            try
+            {
+                //validate Input
+                if (string.IsNullOrEmpty(TeacherId) || string.IsNullOrEmpty(ClassCode))
+                    throw new BadRequestException("TeacherId Or ClassCode cannot be null or empty.");
+                //Get Class Id
+                var classEntity = await _unitOfWork.GetRepository<ClassEntity, string>().GetEntityWithCode<ClassEntity>(ClassCode);
+
+                //check Teacher Is Assign To calss 
+                var teachrerClassAssignment = await _unitOfWork.GetRepository<TeacherClass, (string, int)>().GetByIdAsync((TeacherId, classEntity!.ClassID));
+
+                if (teachrerClassAssignment == null)
+                    throw new NotFoundException($"Teacher with ID {TeacherId} is not assigned to Class {ClassCode}.");
+                //Remove Teacher From Class
+                _unitOfWork.GetRepository<TeacherClass, (string, int)>().DeleteAsync(teachrerClassAssignment);
+                var res = await _unitOfWork.SaveChanges();
+                if (res <= 0)
+                    throw new BadRequestException("Failed to remove Teacher from Class.");
+                return new GenericResponseDto()
+                {
+                    IsSuccess = true,
+                    Message = " Teacher removed from Class successfully."
+                };
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while Remove Teacher From Class ");
+                return new GenericResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
         }
 
-        public Task<GenericResponseDto> RemoveTeacherFromSubject(string TeacherId, string SubjectCode)
+        public async Task<GenericResponseDto> RemoveTeacherFromSubject(string TeacherId, string SubjectCode)
         {
-            throw new NotImplementedException();
+            try
+            {
+                //validate Input
+                if (string.IsNullOrEmpty(TeacherId) || string.IsNullOrEmpty(SubjectCode))
+                    throw new BadRequestException("TeacherId Or SubjectCode cannot be null or empty.");
+                //Check On Teacher Exist
+                var teacher = await _unitOfWork.GetRepository<Teacher, string>().GetByIdAsync(TeacherId);
+                if (teacher == null)
+                    throw new NotFoundException($"Teacher with ID {TeacherId} not found.");
+                //Check On User Role AS Teacher
+                var isTeacher = await _userManager.IsInRoleAsync(teacher, "Teacher");
+                if (!isTeacher)
+                    throw new BadRequestException($"User with ID {TeacherId} is not a Teacher.");
+                //Check On Subject Exist
+                var subject = await _unitOfWork.GetRepository<Subject, int>().GetEntityWithCode<Subject>(SubjectCode);
+                if (subject is null)
+                    throw new NotFoundException($"Subject with Code {SubjectCode} not found.");
+                //Check On Teacher Assigned In Subject
+                if (!teacher.Subjects.Contains(subject))
+                    throw new NotFoundException($"Teacher with ID {TeacherId} is not assigned to Subject {SubjectCode}.");
+                //Remove Teacher From Subject
+                teacher.Subjects.Remove(subject);
+                var res = await _userManager.UpdateAsync(teacher);
+                if (!res.Succeeded)
+                {
+                    var errors = res.Errors.Select(e => e.Description);
+                    throw new ValidationErrorsExecption(errors);
+                }
+                return new GenericResponseDto()
+                {
+                    IsSuccess = true,
+                    Message = " Teacher removed from Subject successfully."
+                };
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while Remove Teacher From Subject ");
+                return new GenericResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
         }
 
         #endregion

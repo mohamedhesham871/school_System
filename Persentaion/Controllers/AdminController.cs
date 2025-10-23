@@ -73,5 +73,63 @@ namespace Presentation.Controllers
             var result = await services.AssignStudentToClass(StudentId, ClassCode);
             return Ok(result);
         }
+
+        //Assign Student to Subject
+        [HttpPost("AssignStudentToSubject/{StudentId}/{SubjectCode}")]
+        public async Task<IActionResult> AssignStudentToSubject([FromRoute] string StudentId, [FromRoute] string SubjectCode)
+        {
+            var result = await services.AssingStudentToSubject(StudentId, SubjectCode);
+            return Ok(result);
+        }
+
+        //Assign Teacher to Class
+        [HttpPost("AssignTeacherToClass/{TeacherId}/{ClassCode}")]
+        public async Task<IActionResult> AssignTeacherToClass([FromRoute] string TeacherId, [FromRoute] string ClassCode)
+        {
+            var result = await services.AssignTeacherToClass(TeacherId, ClassCode);
+            return Ok(result);
+
+        }
+
+        //Assign Teacher to Subject
+        [HttpPost("AssignTeacherToSubject/{TeacherId}/{SubjectCode}")]
+        public async Task<IActionResult> AssignTeacherToSubject([FromRoute] string TeacherId, [FromRoute] string SubjectCode)
+        {
+            var result = await services.AssingTeacherToSubject(TeacherId, SubjectCode);
+            return Ok(result);
+        }
+
+        //Remove Student from Class
+        [HttpDelete("RemoveStudentFromClass/{StudentId}/{ClassCode}")]
+        public async Task<IActionResult> RemoveStudentFromClass([FromRoute] string StudentId, [FromRoute] string ClassCode)
+        {
+            var result = await services.RemoveStudentFromClass(StudentId, ClassCode);
+            return Ok(result);
+        }
+        //Remove Student from Subject
+        [HttpDelete("RemoveStudentFromSubject/{StudentId}/{SubjectCode}")]
+        public async Task<IActionResult> RemoveStudentFromSubject([FromRoute] string StudentId, [FromRoute] string SubjectCode)
+        {
+            var result = await services.RemoveStudentFromSubject(StudentId, SubjectCode);
+            return Ok(result);
+
+        }
+
+        //Remove Teacher from Class
+        [HttpDelete("RemoveTeacherFromClass/{TeacherId}/{ClassCode}")]
+        public async Task<IActionResult> RemoveTeacherFromClass([FromRoute] string TeacherId, [FromRoute] string ClassCode)
+        {
+            var result = await services.RemoveTeacherFromClass(TeacherId, ClassCode);
+            return Ok(result);
+        }
+
+        //Remove Teacher from Subject
+        [HttpDelete("RemoveTeacherFromSubject/{TeacherId}/{SubjectCode}")]
+        public async Task<IActionResult> RemoveTeacherFromSubject([FromRoute] string TeacherId, [FromRoute] string SubjectCode)
+        {
+            var result = await services.RemoveTeacherFromSubject(TeacherId, SubjectCode);
+            return Ok(result);
+        }
+        //
     }
 }
