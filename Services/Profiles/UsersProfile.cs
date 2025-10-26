@@ -51,25 +51,31 @@ namespace Services.Profiles
 
 
             /*5*/
-            CreateMap<Teacher, UserProfileDto>()
-               .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom<PictureUrlResolver>());
-            /*6*/
-            CreateMap<Students, UserProfileDto>()
-               .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom<PictureUrlResolver>());
-            /*7*/
+            //CreateMap<Teacher, UserProfileDto>()
+            //   .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom<PictureUrlResolver>());
+            ///*6*/
+            //CreateMap<Students, UserProfileDto>()
+            //   .ForMember(dest => dest.ProfileImage, opt => opt.MapFrom<PictureUrlResolver>());
+            ///*7*/
             CreateMap<UpdateTeacherDto, Teacher>()
            .ForMember(dest => dest.Status, src => src.MapFrom(opt => opt.Status.ToString()));
 
             CreateMap<Teacher, TeacherResultDto>().
                 ForMember(dest => dest.ProfileImage, src => src.MapFrom<PictureUrlResolverResutlTeacher>());
 
+            /*10*/
+            CreateMap<AppUsers,AdminProfileDto>().
+              ForMember(dest => dest.ProfileImage, opt => opt.MapFrom<PictureUrlResolver>());
+
+
+
         }
 
     }
     //For Resolving the Full URL of the Picture
-    public class PictureUrlResolver(IConfiguration config) : IValueResolver<AppUsers, UserProfileDto, string>
+    public class PictureUrlResolver(IConfiguration config) : IValueResolver<AppUsers, AdminProfileDto, string>
     {
-        public string Resolve(AppUsers source, UserProfileDto destination, string destMember, ResolutionContext context)
+        public string Resolve(AppUsers source, AdminProfileDto destination, string destMember, ResolutionContext context)
         {
             var baseUrl = config["BaseUrl"] ?? string.Empty;
 

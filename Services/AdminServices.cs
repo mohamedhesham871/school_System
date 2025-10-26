@@ -6,8 +6,11 @@ using Domain.Models;
 using Domain.Models.User;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Services.SpecificationsFile;
+using Services.SpecificationsFile.StudentSpec;
 using Services.SpecificationsFile.Teachers;
 using Shared;
 using Shared.GradeDtos;
@@ -18,9 +21,12 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Services
 {
@@ -674,73 +680,290 @@ namespace Services
 
         #endregion
 
-        public Task<AdminDashboardDto> adminDashboardDto()
+       
+        public async Task<AdminProfileDto> getAdminProfile(string UserId)
         {
+            try
+            {
+                if (string.IsNullOrEmpty(UserId))
+                    throw new NullReferenceException("UserId Can not be Null Or Empty");
+
+                var user = await _userManager.FindByIdAsync(UserId);
+                if (user == null)
+                    throw new NotFoundException($"User With Id :{UserId} Is Not Found");
+
+                //check Admin In Role 
+                var IsAmin = await _userManager.IsInRoleAsync(user, "Admin");
+                if (!IsAmin)
+                    throw new UnauthorizedAccessException("User Not Allowed to Access To this Page"); 
+
+                var response = _mapper.Map<AdminProfileDto>(user);
+                return response;
+
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error While Get Profile");
+                throw;
+            }
+        }
+
+        public async Task<GenericResponseDto> updateAdminProfile(string UserId, UpdateAdminProfileDto adminProfileDto)
+        {
+            try
+            {
+                //validate Input
+                if (string.IsNullOrEmpty(UserId))
+                    throw new NullReferenceException("UserId Is Invalid");
+                var user= await _userManager.FindByIdAsync(UserId);
+                if (user is null)
+                    throw new NotFoundException($"User With Id {UserId} Is Not Found .");
+                //check Role Async 
+                if (!await _userManager.IsInRoleAsync(user, "Admin"))
+                    throw new UnauthorizedAccessException("User Is Not Admin ,Not Allowed Access");
+
+                //check UserEmail Change
+                if (!string.IsNullOrEmpty(adminProfileDto.UserName)&&!string.Equals(user.UserName, adminProfileDto.UserName, StringComparison.OrdinalIgnoreCase))
+                {
+                    var ress = await _userManager.FindByNameAsync(adminProfileDto.UserName);
+                    if (ress is not null)
+                        throw new BadRequestException($"this User Name {adminProfileDto.UserName} is Alraedy Used ,try Another");
+
+                    adminProfileDto.UserName = adminProfileDto.UserName;
+                }
+                //check Phone Number 
+                if (!string.IsNullOrEmpty(adminProfileDto.PhoneNumber)&&!string.Equals(user.PhoneNumber, adminProfileDto.PhoneNumber, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (!Regex.IsMatch(adminProfileDto.PhoneNumber!, @"^(010|011|012|015)[0-9]{8}$"))
+                        throw new BadRequestException($"Phone Number :{adminProfileDto.PhoneNumber} is Invalid");
+                    user.PhoneNumber = adminProfileDto.PhoneNumber;
+                }
+                if (adminProfileDto.ProfileImage != null && adminProfileDto.ProfileImage.Length > 0)
+                {
+                    var profilePath = await UploadImageAsync(adminProfileDto.ProfileImage);
+                    user.ProfileImage = profilePath;
+                }
+                user.Address= adminProfileDto.Address??user.Address;
+
+                  var res =  await  _userManager.UpdateAsync(user);
+                if (!(res.Succeeded))
+                {
+                    var error = res.Errors.Select(e => e.Description);
+                    throw new ValidationErrorsExecption(error);
+                }
+                return new GenericResponseDto()
+                {
+                    IsSuccess = true,
+                    Message = "Successfully"
+                };
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error While Try To Update Profile ");
+                return new GenericResponseDto()
+                {
+                    IsSuccess = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<AdminDashboardDto> adminDashboardDto()
+        {
+            //{ totalStudents, totalTeachers, totalClasses, totalSubjects,  }
+            try{
+
+                //getting Total Students
+                var StudentCounter = await _unitOfWork.GetRepository<Students, Guid>().CountAsync(new Specifications<Students>());
+                var StudentActive = await _unitOfWork.GetRepository<Students, Guid>().CountAsync(new Specifications<Students>(r=>r.Status=="Active"));
+
+                //getting Total Techer
+                 var teacherCounter= await _unitOfWork.GetRepository<Teacher, Guid>().CountAsync(new Specifications<Teacher>());
+                var ActiveTeacher = await _unitOfWork.GetRepository<Teacher, Guid>().CountAsync(new Specifications<Teacher>(r => r.Status == "Active"));
+                //Getting Total Classes
+                var classes= await _unitOfWork.GetRepository<ClassEntity,int>().CountAsync(new Specifications<ClassEntity>());
+
+                //Getting Total Subjects
+                var Subjects = await _unitOfWork.GetRepository<Subject,int>().CountAsync(new Specifications<Subject>());
+
+                var response = new AdminDashboardDto()
+                {
+                    totalStudents = StudentCounter,
+                    totalStudentsActive = StudentActive,
+                    totalTeachers = teacherCounter,
+                    totalTechersActive = ActiveTeacher,
+                    totalClasses = classes,
+                    totalSubjects = Subjects
+
+                };
+                return response;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error While retrieve Admin Dashboard ");
+                throw;
+            }
             throw new NotImplementedException();
         }
 
-        public Task<AdminProfileDto> getAdminProfile(string UserId)
+
+        #region For Student Management
+        public async Task<PaginationResponse<StudentShortResponseDto>> GetAllStudents(USerFilteration filter)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var spec = new StudentSpecification(filter,false);
+                var studets = await _unitOfWork.GetRepository<Students, Guid>().GetByConditionAsync(spec);
+
+                var SpecCount = new StudentSpecification(filter, true);
+                var TotalCount = await _unitOfWork.GetRepository<Students, Guid>().CountAsync(SpecCount);
+
+                var data = studets.Select(x => new StudentShortResponseDto()
+                {
+                    userName = x.UserName,
+                    studentEmail = x.Email,
+                    GradeName = x.Grade.GradeName,
+                    ClassName = x.Class.ClassName,
+                    StudentId = x.Id
+                });
+
+                var response = new PaginationResponse<StudentShortResponseDto>()
+                {
+                    Take = 15,
+                    Skip = filter.PageIndex,
+                    Total = TotalCount,
+                    Data = data
+                };
+                return response;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error While retrieve Students");
+                throw;
+
+            }
         }
 
 
-        public Task<PaginationResponse<StudentShortResponseDto>> GetAllStudentAssingedInClass(string ClassCode, USerFilteration filter)
+        public async Task<StudentResponseDetailsDto> GetStudentDetailsByCode(string studentId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                //valid Input 
+                if (string.IsNullOrEmpty(studentId)) throw new NullReferenceException("Can't Send Empty Or Null Student Id");
+
+                var spec= new StudentSpecification(studentId);
+                var student= await _unitOfWork.GetRepository<Students,Guid>().GetByIdAsyncSpecific(spec);
+
+                if (student == null)
+                    throw new NotFoundException($"Student With Id :{studentId} is not Found");
+
+                var response = new StudentResponseDetailsDto
+                {
+                    UserId = student.Id,
+                    UserName = student.UserName,
+                    FirstName = student.FirstName,
+                    LastName = student.LastName,
+                    Email = student.Email,
+                    PhoneNumber = student.PhoneNumber,
+                    parentNumber = student.ParentName,
+                    ClassName = student.Class.ClassName,
+                    GradeName = student.Grade.GradeName,
+                    SubjectName = student.StudentAssignInSubjects.Where(s=>s.StudentId==studentId).Select(s=>s.SubjectName).ToList(),
+                };
+
+                return response;
+
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, " Errro while get Student Data");
+                throw;
+            }
+        }
+        #endregion
+
+
+        #region For Teacher
+
+        public async Task<PaginationResponse<TeacherShortResponseDto>> GetAllTeachers(USerFilteration filter)
+        {
+            try
+            {
+                var spec=  new TeacherSpecificationWithClassAndSubjects(filter,false);
+                var teacher = await _unitOfWork.GetRepository<Teacher, Guid>().GetByConditionAsync(spec);
+
+                var SpecCount = new TeacherSpecificationWithClassAndSubjects(filter, true);
+                var count = await _unitOfWork.GetRepository<Teacher, Guid>().CountAsync(SpecCount);
+
+                var data = teacher.Select(t => new TeacherShortResponseDto()
+                {
+                    userId=t.Id,
+                    FirstName = t.FirstName,
+                    UserName = t.UserName,
+                    Email = t.Email,
+                    className = t.TeacherClasses.Select(s => s.Class.ClassName).ToList(),
+                    subjectAssignName = t.Subjects.Select(s => s.SubjectName).ToList(),
+                    Specialization=t.Specialization,
+                    phoneNumber=t.PhoneNumber,
+                    status =t.Status
+                });
+
+                var response = new PaginationResponse<TeacherShortResponseDto>()
+                {
+                    Take = 15,
+                    Skip = filter.PageIndex,
+                    Total = count,
+                    Data = data
+                };
+                return response;
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error while retrieve Teachers ");
+                throw;
+            }
         }
 
-        public Task<PaginationResponse<StudentShortResponseDto>> GetAllStudentAssingedInSubject(string SubjectCode, USerFilteration filter)
-        {
-            throw new NotImplementedException();
-        }
 
-        public Task<PaginationResponse<StudentShortResponseDto>> GetAllStudents(USerFilteration filter)
+        public async Task<TeacherDetailsForAdminDto> GetTeaherDetailsByCode(string TeacherId)
         {
-            throw new NotImplementedException();
-        }
+            try
+            {
+                if (string.IsNullOrEmpty(TeacherId))
+                    throw new NullReferenceException("Invalid Teacher ID");
 
-        public Task<PaginationResponse<StudentShortResponseDto>> GetAllStudentsAssingInGrade(string GradeCode, USerFilteration filter)
-        {
-            throw new NotImplementedException();
-        }
+                var spec = new TeacherSpecificationWithClassAndSubjects(TeacherId);
+                var teacher = await _unitOfWork.GetRepository<Teacher, Guid>().GetByIdAsyncSpecific(spec);
 
-        public Task<PaginationResponse<SubjectResponseShortDto>> GetAllSubjectTecherAssignIn(string TeacherId)
-        {
-            throw new NotImplementedException();
-        }
+                if (teacher is null) throw new NotFoundException("Can't Find User");
+                var response = new TeacherDetailsForAdminDto()
+                {
+                    FirstName = teacher.FirstName,
+                    LastName = teacher.LastName,
+                    UserName = teacher.UserName,
+                    Email = teacher.Email,
+                    PhoneNumber = teacher.PhoneNumber,
+                    HiringDate = teacher.HiringDate,
+                    Status = teacher.Status,
+                    Specialization = teacher.Specialization,
+                    UserId = teacher.Id,
+                    SubjectsName = teacher.Subjects.Select(s => s.SubjectName).ToList(),
+                    ClassesName = teacher.TeacherClasses.Select(s => s.Class.ClassName).ToList()
 
-        public Task<PaginationResponse<TeacherShortResponseDto>> GetAllTeachers(USerFilteration filter)
-        {
-            throw new NotImplementedException();
-        }
+                };
+                return response;
 
-        public Task<PaginationResponse<TeacherShortResponseDto>> GetAllTeachersAssingInClass(string ClassCode, USerFilteration filter)
-        {
-            throw new NotImplementedException();
-        }
+            }catch(Exception ex)
 
-        public Task<PaginationResponse<TeacherShortResponseDto>> GetAllTeachersAssingInGrade(string GradeCode, USerFilteration filter)
-        {
-            throw new NotImplementedException();
+            {
+                _logger.LogError(ex, $"Error Get Details Of Teacher Id {TeacherId}");
+                throw;
+            }
         }
+        #endregion
 
-        public Task<StudentResponseDetailsDto> GetStudentDetailsByCode(string StudentCode)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<TeacherResultDto> GetTeaherDetailsByCode(string TeacherCode)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<string> updateAdminProfile(string UserId, UpdateAdminProfileDto adminProfileDto)
-        {
-            throw new NotImplementedException();
-        }
-
-        
         private async Task<string> UploadImageAsync(IFormFile imageFile)
         {
             var images = "images/Default_Icone.png";

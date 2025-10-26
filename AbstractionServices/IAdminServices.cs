@@ -29,27 +29,30 @@ namespace AbstractionServices
         //For Any User
         Task<GenericResponseDto> DeleteUser(string UserId);
 
+                             //Done
+
         //Other Admin Related Services
         Task<AdminDashboardDto> adminDashboardDto();
         Task<AdminProfileDto> getAdminProfile(string UserId);
-        Task<string> updateAdminProfile(string UserId, UpdateAdminProfileDto adminProfileDto);
+        Task<GenericResponseDto> updateAdminProfile(string UserId, UpdateAdminProfileDto adminProfileDto);
        
         #region For Student Management
         Task<PaginationResponse<StudentShortResponseDto>> GetAllStudents(USerFilteration filter);
-        //For Grade, Class, Subject Assignment
-        Task<PaginationResponse<StudentShortResponseDto>> GetAllStudentsAssingInGrade(string GradeCode, USerFilteration filter);
-        Task<PaginationResponse<StudentShortResponseDto>> GetAllStudentAssingedInClass(string ClassCode, USerFilteration filter);
-        Task<PaginationResponse<StudentShortResponseDto>> GetAllStudentAssingedInSubject(string SubjectCode, USerFilteration filter);
         Task<StudentResponseDetailsDto> GetStudentDetailsByCode(string StudentCode);
+        //For Grade, Class, Subject Assignment
+        //1 - GetAllStudentsAssingInGrade 
+        //2-  GetAllStudentAssingedInClass
+        //3- GetAllStudentAssingedInSubject
 
         #endregion
+
         #region For Teacher Management
         Task<PaginationResponse<TeacherShortResponseDto>> GetAllTeachers(USerFilteration filter);
         //For Grade, Class Assignment
-        Task<PaginationResponse<TeacherShortResponseDto>> GetAllTeachersAssingInGrade(string GradeCode, USerFilteration filter);
-        Task<PaginationResponse<TeacherShortResponseDto>> GetAllTeachersAssingInClass(string ClassCode, USerFilteration filter);
-        Task<PaginationResponse<SubjectResponseShortDto>> GetAllSubjectTecherAssignIn(string TeacherId);
-        Task<TeacherResultDto> GetTeaherDetailsByCode(string TeacherCode);
+        // GetAllTeachersAssingInGrade
+        // GetAllTeachersAssingInClass
+        // GetAllSubjectTecherAssignIn
+        Task<TeacherDetailsForAdminDto> GetTeaherDetailsByCode(string TeacherCode);
 
         #endregion
 

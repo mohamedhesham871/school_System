@@ -9,9 +9,9 @@ namespace Shared
 {
     public class USerFilteration
     {
-        public int? GradeId { get; set; }
-        public int? SubjectId { get; set; }
-        public int? ClassId { get; set; }
+        public string? GradeCode { get; set; }
+        public string? SubjectCode { get; set; }
+        public string? ClassCode { get; set; }
        
         public SortingExpression? Sorting { get; set; }
         public string? SearchKey { get; set; }

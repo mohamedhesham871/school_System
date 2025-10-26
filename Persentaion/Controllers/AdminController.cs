@@ -14,12 +14,12 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[Controller]")]
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     public class AdminController(IAdminServices services) : ControllerBase
     {
         //Add New Teacher 
         [HttpPost("CreateTeacher")]
-        public async Task<IActionResult> CreateTeacher([FromBody] CreateTeacherDto teacherDto)
+        public async Task<IActionResult> CreateTeacher([FromForm] CreateTeacherDto teacherDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -29,7 +29,7 @@ namespace Presentation.Controllers
         }
         //Add New Student
         [HttpPost("CreateStudent")]
-        public async Task<IActionResult> CreateStudent([FromBody] CreateStudentDto studentDto)
+        public async Task<IActionResult> CreateStudent([FromForm] CreateStudentDto studentDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -47,7 +47,7 @@ namespace Presentation.Controllers
         }
         //UPdate Student info By Id
         [HttpPut("UpdateStudent/{UserId}")]
-        public async Task<IActionResult> UpdateStudent([FromRoute] string UserId, [FromBody] UpdateStudentDto updateStudentDto)
+        public async Task<IActionResult> UpdateStudent([FromRoute] string UserId, [FromForm] UpdateStudentDto updateStudentDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -58,7 +58,7 @@ namespace Presentation.Controllers
 
         //Update Teacher info By Id
         [HttpPut("UpdateTeacher/{UserId}")]
-        public async Task<IActionResult> UpdateTeacher([FromRoute] string UserId, [FromBody] UpdateTeacherDto updateTeacherDto)
+        public async Task<IActionResult> UpdateTeacher([FromRoute] string UserId, [FromForm] UpdateTeacherDto updateTeacherDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -131,7 +131,57 @@ namespace Presentation.Controllers
             var result = await services.RemoveTeacherFromSubject(TeacherId, SubjectCode);
             return Ok(result);
         }
-     
+         //Get Admin Profile
+        [HttpGet("AdminProfile/{UserId}")]
+        public async Task<IActionResult> ProfileAdmin([FromRoute] string UserId)
+        {
+            var res = await services.getAdminProfile(UserId);
+            return Ok(res);
+        }
+        //Update Admin profile
+        [HttpPut("AdminProfile/{UserId}")]
+        public async Task<IActionResult> AdminProfile([FromRoute] string UesrId, [FromForm] UpdateAdminProfileDto Update, string UserId)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            var res = await services.updateAdminProfile(UserId, Update);
+            return Ok(res);
+        }
+
+        [HttpGet("Dashboard")]
+        public async Task<IActionResult> DashBoard()
+        {
+            var res= await services.adminDashboardDto();
+            return Ok(res);
+        }
+
+        [HttpGet("GetAllStudets")]
+        public async Task<IActionResult>GetAllStudents([FromQuery]USerFilteration f)
+        {
+            var res = await services.GetAllStudents(f);
+            return Ok(res);
+
+        }
+
+        [HttpGet("GetStudent/{studentId}")]
+        public async Task<IActionResult> GetStudent([FromRoute] string studentId)
+        {
+            var res = await services.GetStudentDetailsByCode(studentId);
+            return Ok(res);
+        }
+
+        [HttpGet("GetTeachers")]
+        public async Task<IActionResult> GetAllTeachers([FromQuery] USerFilteration f)
+        {
+            var res = await services.GetAllTeachers(f);
+            return Ok(res);
+        }
+        [HttpGet("GetTeacher/{teacherId}")]
+        public async Task<IActionResult> GetTeacher([FromRoute] string teacherId)
+        {
+            var res = await services.GetStudentDetailsByCode(teacherId);
+            return Ok(res);
+        }
     }
 }

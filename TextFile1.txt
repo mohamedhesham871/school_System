@@ -76,3 +76,5 @@ Api/Student/GetSubjects/{studentId}
 - `GET /Api/Student/MySubjects` - Get enrolled subjects
 - `GET /Api/Student/Schedule` - Get class schedule
 - `GET /Api/Student/Grades` - Get all grades/results
+
+{ totalStudents, totalTeachers, totalClasses, totalSubjects,  }

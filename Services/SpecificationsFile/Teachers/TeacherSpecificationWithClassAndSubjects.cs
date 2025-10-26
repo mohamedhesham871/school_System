@@ -18,16 +18,22 @@ namespace Services.SpecificationsFile.Teachers
             AddInclude(t => t.Subjects!);
         }
 
-        public TeacherSpecificationWithClassAndSubjects(USerFilteration teacherFilteration)
+        public TeacherSpecificationWithClassAndSubjects(USerFilteration f,bool CountOnly) : base(s => 
+           string.IsNullOrEmpty(f.SearchKey)  || s.UserName.ToLower().Contains(f.SearchKey.ToLower())
+          && (!f.State.HasValue || s.Status == f.State.Value.ToString())
+          && (string.IsNullOrEmpty(f.SubjectCode)|| s.Subjects.Any(s => s.Code == f.SubjectCode))
+          && (string.IsNullOrEmpty(f.ClassCode) || s.TeacherClasses.Any(tc => tc.Class.Code == f.ClassCode)))
         {
-            AddInclude(t => t.Subjects!);
-            AddInclude(t => t.TeacherClasses!);
-            //sorting 
-            Sorting(teacherFilteration);
-
-            if (teacherFilteration.PageIndex > 0)
+            if(!CountOnly)
             {
-                ApplyPaging(teacherFilteration.PageIndex,15);
+                AddInclude(t => t.Subjects!);
+                AddInclude(t => t.TeacherClasses!);
+                //sorting 
+                Sorting(f);
+
+                if (f.PageIndex <= 0) f.PageIndex = 1;
+
+                ApplyPaging(f.PageIndex, 15);
             }
         }
         //For Searching By name Or UserName Or Filtering By SubjectId Or ClassId and Counting
