@@ -16,6 +16,7 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using School_Api.ErrorHnadlingMidlleware;
 using StackExchange.Redis;
+using Microsoft.Identity.Client;
 
 namespace School_Api
 {
@@ -45,6 +46,7 @@ namespace School_Api
             builder.Services.AddScoped<IQuestionServices, QuestionServices>();
             builder.Services.AddScoped<IAnswerServices, AnswerServices>();
             builder.Services.AddScoped<IAdminServices, AdminServices>();
+            builder.Services.AddScoped<IClassServices, ClassServices>();
 
             builder.Services.AddAutoMapper(typeof(UsersProfile).Assembly);
             #endregion

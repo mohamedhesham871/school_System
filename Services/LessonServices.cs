@@ -275,7 +275,7 @@ namespace Services
         {
             if (lessonCode is null) throw new NullRefrenceException("Lesson Code Can't be Empty");
             var spec = new LessonInSubjectSpecification(lessonCode);
-            var lesson = await unitOfWork.GetRepository<Lesson, int>().GetByIdAsyncSpecific(spec);
+            var lesson = await unitOfWork.GetRepository<Lesson, int>().GetBySpecific(spec);
             if (lesson is null)
                 throw new NotFoundException("Lesson not found. Please try a valid code.");
 

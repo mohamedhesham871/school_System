@@ -12,11 +12,12 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles ="Admin")]
+    
     public  class ClassEntityController(IClassServices services):ControllerBase
     {
         //Add New ClassEntity
         [HttpPost("AddClass/{GradeId}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddClass([FromRoute] int GradeId, [FromBody] ClassCreateOrUpdate create)
         {
             if (!ModelState.IsValid)
@@ -28,6 +29,7 @@ namespace Presentation.Controllers
 
         //Update ClassEntity
         [HttpPatch("UpdateClass/{ClassCode}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateClass([FromRoute] string ClassCode, [FromBody] ClassCreateOrUpdate update)
         {
             if (!ModelState.IsValid)
@@ -38,6 +40,7 @@ namespace Presentation.Controllers
         }
         //Delete ClassEntity
         [HttpDelete("DeleteClass/{ClassCode}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteClass([FromRoute] string ClassCode)
         {
             var result = await services.DeleteClass(ClassCode);
@@ -46,20 +49,22 @@ namespace Presentation.Controllers
 
         //Class Details
         [HttpGet("ClassDeatils/{classCode}")]
-        public async Task<IActionResult> ClassDetials([FromRoute] string classcode)
+        [Authorize(Roles ="Admin,Teacher,Student")]
+        public async Task<IActionResult> ClassDetials([FromRoute] string classCode)
         {
-            var res = await services.classDetialsResponseDto(classcode);
+            var res = await services.classDetialsResponseDto(classCode);
             return Ok(res);
         }
 
         //Get All Class
         [HttpGet("AllClasses")]
+        [Authorize(Roles ="Admin,Teacher")]
         public async Task<IActionResult> GetAllClasses([FromQuery]ClassFilteration filter)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var res = services.GetAllClasses(filter);
+            var res = await services.GetAllClasses(filter);
             return Ok(res);
         }
 

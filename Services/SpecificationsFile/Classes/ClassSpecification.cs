@@ -18,18 +18,21 @@ namespace Services.SpecificationsFile.Classes
         }
 
 
-        public ClassSpecification(ClassFilteration classFilteration) : base(c=>(string.IsNullOrEmpty(classFilteration.GradeCode) ||
-         c.Grade.GradeCode == classFilteration.GradeCode) &&
+        public ClassSpecification(ClassFilteration classFilteration ,bool CountOnly) : base(c=>(!classFilteration.GradeId.HasValue ||
+         c.GradeID == classFilteration.GradeId) &&
         (string.IsNullOrEmpty(classFilteration.SearchKey) ||
          c.ClassName.Contains(classFilteration.SearchKey)))
         {
-            AddInclude(c => c.Grade!);
+            if (!CountOnly)
+            {
+                AddInclude(c => c.Grade!);
 
-            Sorting(classFilteration);
+                Sorting(classFilteration);
 
-            if (classFilteration.PageIndex <= 0) classFilteration.PageIndex = 1;
-            
-                ApplyPaging(classFilteration.PageIndex,classFilteration.PageSize);
+                if (classFilteration.PageIndex <= 0) classFilteration.PageIndex = 1;
+
+                ApplyPaging(classFilteration.PageIndex, classFilteration.PageSize);
+            }
         }
 
         private void Sorting(ClassFilteration f)

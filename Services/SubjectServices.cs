@@ -67,7 +67,7 @@ namespace Services
             //cheack if Subject Exists
             var eixts = await  unitOfWork.GetRepository<Subject, int>().ExistsAsync(new SubjectDuplicationCheck(subjectCode));
             if (eixts is false) throw new NotFoundException("Subject Not Found");
-            var subject = await unitOfWork.GetRepository<Subject, int>().GetByIdAsyncSpecific(new SubjectDuplicationCheck(subjectCode));
+            var subject = await unitOfWork.GetRepository<Subject, int>().GetBySpecific(new SubjectDuplicationCheck(subjectCode));
              unitOfWork.GetRepository<Subject, int>().DeleteAsync(subject);
             var result = await unitOfWork.SaveChanges();
             if (result > 0) return "Subject Deleted Successfully";
@@ -100,7 +100,7 @@ namespace Services
         {
             var Spec = new SubjectSpecificationWithGradeAndLessonAndTeacher(SubjectCode);
 
-            var subject = await unitOfWork.GetRepository<Subject, int>().GetByIdAsyncSpecific(Spec);
+            var subject = await unitOfWork.GetRepository<Subject, int>().GetBySpecific(Spec);
             if (subject is null) throw new NotFoundException($"Subject with code '{SubjectCode}' was not found.");
             var subjectDto = new SubjectResponseDto
             {

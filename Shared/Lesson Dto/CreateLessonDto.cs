@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Shared.Lesson_Dto
 {
-    public  class CreateLessonDto
+    public class CreateLessonDto
     {
-        [Required,MaxLength(250)]
+        [Required, MaxLength(250)]
         public string Title { get; set; } = string.Empty;
         [Required]
         public string Description { get; set; } = string.Empty;

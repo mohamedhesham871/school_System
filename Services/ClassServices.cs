@@ -15,6 +15,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Shared.IdentityDtos.Admin;
 using Services.SpecificationsFile.Classes;
+using Services.SpecificationsFile;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Services
 {
@@ -31,13 +33,17 @@ namespace Services
                 var grade = await _unitOfWork.GetRepository<Grade, int>().GetByIdAsync(GradeId);
                 if (grade is null)
                     throw new NotFoundException($"Grade with ID {GradeId} not found.");
+                //check if Class Name IS Already Found 
+                var IsFound = await _unitOfWork.GetRepository<ClassEntity, int>().CountAsync(new Specifications<ClassEntity>(s => s.ClassName == create.ClassName));
+                if (IsFound >0)
+                    throw new BadRequestException($"Class with Name {create.ClassName} is already exists.");
                 //Create New Class
                 var classEntity = new ClassEntity
                 {
                     ClassName = create.ClassName,
                     GradeID = GradeId
                 };
-                _unitOfWork.GetRepository<ClassEntity, string>().AddAsync(classEntity);
+                _unitOfWork.GetRepository<ClassEntity, int>().AddAsync(classEntity);
                 var res = await _unitOfWork.SaveChanges();
                 if (res <= 0)
                     throw new BadRequestException("Failed to create new Class.");
@@ -129,7 +135,7 @@ namespace Services
                 if (string.IsNullOrEmpty(ClassCode))
                     throw new NullReferenceException("ClassCode cannot be null or empty.");
                 var spec = new ClassSpecification(ClassCode);
-                var classEntity = await _unitOfWork.GetRepository<ClassEntity, string>().GetByIdAsyncSpecific(spec);
+                var classEntity = await _unitOfWork.GetRepository<ClassEntity, string>().GetBySpecific(spec);
 
                 if (classEntity is null)
                     throw new NotFoundException($"Class with Code {ClassCode} not found.");
@@ -158,9 +164,9 @@ namespace Services
         {
             try
             {
-                var spec = new ClassSpecification(filter);
+                var spec = new ClassSpecification(filter ,false);
                 var classes= await _unitOfWork.GetRepository<ClassEntity,int>().GetByConditionAsync(spec);
-                var count = new ClassSpecificationCount(filter);
+                var count = new ClassSpecification(filter,true);
                 var totalcount = await _unitOfWork.GetRepository<ClassEntity, int>().CountAsync(count);
 
                 var paginationResponse = new PaginationResponse<ClassDetialsResponseDto>()

@@ -45,10 +45,10 @@ namespace Persistence.Repository
             return SpecificQuery;
         }
 
-        public async Task<TEntity> GetByIdAsyncSpecific(ISpecifications<TEntity> Spec)
+        public async Task<TEntity> GetBySpecific(ISpecifications<TEntity> Spec)
         {
             var res = await SpecificationEvaluator.CreateQuery(contexts.Set<TEntity>(), Spec).FirstOrDefaultAsync();
-            return res!;
+            return res;
         }
 
         public async Task<int> CountAsync(ISpecifications<TEntity> Spec)

@@ -10,7 +10,6 @@ namespace Shared
     public class ClassCreateOrUpdate
     {
         public string ClassName { get; set; } = string.Empty;
-        public int GradeID { get; set; } 
-      
+
     }
 }

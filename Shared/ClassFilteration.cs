@@ -1,4 +1,5 @@
-﻿using Shared.IdentityDtos;
+﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Shared.IdentityDtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,12 +10,20 @@ namespace Shared
 {
     public class ClassFilteration
     {
-        public string? GradeCode;
+        public int? GradeId;
 
         public SortingClass? Sorting { get; set; }
         public string? SearchKey { get; set; }
 
         public int PageIndex { get; set; } = 1;
-        public int PageSize { get; } = 10;
+
+        private int pageSize { get; set; } 
+        private const int MaxPageSize = 20;
+        private const int DefaultPageSize = 10;
+        public  int PageSize
+        {
+            get => pageSize;
+            set => pageSize = (value > MaxPageSize|| value< DefaultPageSize) ? DefaultPageSize : value;
+        }
     }
 }

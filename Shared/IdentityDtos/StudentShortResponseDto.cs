@@ -12,7 +12,7 @@ namespace Shared.IdentityDtos
         public string? studentEmail { get; set; }
         public string? userName { get; set; }
         public string? ClassName { get; set; }
-        public string? GradeName { get; set; 
+        public string? GradeName { get; set; }
         public string? status { get; set; }
 
 

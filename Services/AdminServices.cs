@@ -853,7 +853,7 @@ namespace Services
                 if (string.IsNullOrEmpty(studentId)) throw new NullReferenceException("Can't Send Empty Or Null Student Id");
 
                 var spec= new StudentSpecification(studentId);
-                var student= await _unitOfWork.GetRepository<Students,Guid>().GetByIdAsyncSpecific(spec);
+                var student= await _unitOfWork.GetRepository<Students,Guid>().GetBySpecific(spec);
 
                 if (student == null)
                     throw new NotFoundException($"Student With Id :{studentId} is not Found");
@@ -935,7 +935,7 @@ namespace Services
                     throw new NullReferenceException("Invalid Teacher ID");
 
                 var spec = new TeacherSpecificationWithClassAndSubjects(TeacherId);
-                var teacher = await _unitOfWork.GetRepository<Teacher, Guid>().GetByIdAsyncSpecific(spec);
+                var teacher = await _unitOfWork.GetRepository<Teacher, Guid>().GetBySpecific(spec);
 
                 if (teacher is null) throw new NotFoundException("Can't Find User");
                 var response = new TeacherDetailsForAdminDto()

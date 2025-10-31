@@ -13,7 +13,7 @@ namespace Domain.Contract
         Task<IEnumerable<TEntity>> GetAllAsync();
         //Want to Make Dynamic Query Later 
         Task<IEnumerable<TEntity>> GetByConditionAsync(ISpecifications<TEntity> Spec);
-        Task<TEntity> GetByIdAsyncSpecific( ISpecifications<TEntity> Spec);
+        Task<TEntity> GetBySpecific( ISpecifications<TEntity> Spec);
         Task<T?> GetEntityWithCode<T>(string code) where T : class, IHasCode;
         void AddAsync(TEntity entity);
         void UpdateAsync(TEntity entity);
