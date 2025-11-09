@@ -10,5 +10,15 @@ namespace Shared
     {
         public bool IsSuccess { get; set; }
         public string Message { get; set; } = null!;
+        public GenericResponseDto(bool isSuccess ,string message)
+        {
+            IsSuccess = isSuccess;
+            Message = message;
+
+        }
+        public GenericResponseDto()
+        {
+                
+        }
     }
 }

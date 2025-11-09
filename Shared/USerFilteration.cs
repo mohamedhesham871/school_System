@@ -9,7 +9,7 @@ namespace Shared
 {
     public class USerFilteration
     {
-        public string? GradeCode { get; set; }
+        public int? GradeId{ get; set; }
         public string? SubjectCode { get; set; }
         public string? ClassCode { get; set; }
        

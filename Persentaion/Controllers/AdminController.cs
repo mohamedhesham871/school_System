@@ -14,7 +14,7 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[Controller]")]
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public class AdminController(IAdminServices services) : ControllerBase
     {
         //Add New Teacher 
@@ -180,7 +180,7 @@ namespace Presentation.Controllers
         [HttpGet("GetTeacher/{teacherId}")]
         public async Task<IActionResult> GetTeacher([FromRoute] string teacherId)
         {
-            var res = await services.GetStudentDetailsByCode(teacherId);
+            var res = await services.GetTeaherDetailsByCode(teacherId);
             return Ok(res);
         }
     }

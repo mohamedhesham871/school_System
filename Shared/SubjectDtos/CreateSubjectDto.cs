@@ -22,10 +22,8 @@ namespace Shared.SubjectDtos
             [MaxLength(500, ErrorMessage = "Description cannot exceed 500 characters")]
             public string Description { get; set; } = string.Empty;
 
-            public string? TeacherId { get; set; }
+            //public string? TeacherId { get; set; }
 
-            [Required(ErrorMessage = "Grade is required")]
-            public int GradeID { get; set; }
         }
     
 }

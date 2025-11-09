@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Shared.SubjectDtos
 {
-    public class SubjectResponseDto
+    public class SubjectResponseDetailsDto
     {
         public string SubjectName { get; set; } = null!;
         public string SubjectCode { get; set; } = null!;
@@ -19,6 +19,6 @@ namespace Shared.SubjectDtos
         public TeacherShortResponseDto? Teacher { get; set; } // Navigation property to Teacher
         public GradeResponseShortDto Grade { get; set; } = null!; // Navigation property to Grade
         public List<LessonShortResponseDto?> Lessons { get; set; } = new();
-
+        
     }
 }

@@ -106,6 +106,7 @@ namespace School_Api
             var app = builder.Build();
             //Global Error Handling Middleware
             app.UseMiddleware<GlobalErrorHandlingMiddleware>();
+            
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

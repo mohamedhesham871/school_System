@@ -19,7 +19,7 @@ namespace Services.SpecificationsFile.StudentSpec
         }
 
         public StudentSpecification(USerFilteration f,bool CountOnly) : base(s =>
-                     (string.IsNullOrEmpty(f.GradeCode) || s.Grade.GradeCode == f.GradeCode) &&
+                     (!f.GradeId.HasValue || s.GradeID == f.GradeId) &&
                      (string.IsNullOrEmpty(f.ClassCode) || s.Class.Code == f.ClassCode) &&
                      (!f.State.HasValue|| s.Status==f.State.Value.ToString()) &&
                      (string.IsNullOrEmpty(f.SearchKey) || s.UserName.Contains(f.SearchKey)))

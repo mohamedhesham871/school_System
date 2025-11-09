@@ -193,14 +193,14 @@ namespace Services
                     user.UserName = Update.Email; // Assuming UserName is same as Email
                 }
                 //check On Phone Number Change
-                if (!string.Equals(user.PhoneNumber, Update.PhoneNumber, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(user.PhoneNumber, Update.PhoneNumber, StringComparison.OrdinalIgnoreCase)&& !string.IsNullOrEmpty(Update.PhoneNumber))
                 {
                     if (!Regex.IsMatch(Update.PhoneNumber!, @"^(010|011|012|015)[0-9]{8}$"))
                         throw new BadRequestException($"Phone Number :{Update.PhoneNumber} is Invalid");
                     user.PhoneNumber = Update.PhoneNumber;
                 }
                 //check On Parent Contact Change
-                if (!string.Equals(user.ParentContact, Update.ParentContact, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(user.ParentContact, Update.ParentContact, StringComparison.OrdinalIgnoreCase)&& !string.IsNullOrEmpty(Update.ParentContact))
                 {
                     if (!Regex.IsMatch(Update.PhoneNumber!, @"^(010|011|012|015)[0-9]{8}$"))
                         throw new BadRequestException($"Phone Number :{Update.PhoneNumber} is Invalid");
@@ -223,11 +223,11 @@ namespace Services
                 user.FirstName = Update.FirstName ?? user.FirstName;
                 user.LastName = Update.LastName ?? user.LastName;
                 user.Address = Update.Address ?? user.Address;
-                user.Gender = Update.gender.ToString() ?? user.Gender;
+                user.Gender = Update.gender?.ToString() ?? user.Gender;
                 user.DateOfBirth = Update.DateOfBirth ?? user.DateOfBirth;
                 user.ParentName = Update.ParentName ?? user.ParentName;
                 user.AssignToSchool = Update.AssignToSchool ?? user.AssignToSchool;
-                user.Status = Update.Status.ToString() ?? user.Status;
+                user.Status = Update.Status?.ToString() ?? user.Status;
                 user.UpdatedAt = DateTime.UtcNow;
 
                 #endregion
@@ -265,7 +265,7 @@ namespace Services
                     throw new BadRequestException($"User with ID {UserId} is not a Teacher.");
                 //check On Email Change
                 #region UpadteUser Data
-                if (!string.Equals(user.Email, update.Email, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(user.Email, update.Email, StringComparison.OrdinalIgnoreCase)&&!string.IsNullOrEmpty(update.Email))
                 {
                     var existingByEmail = await _userManager.FindByEmailAsync(update.Email!);
                     if (existingByEmail != null && existingByEmail.Id != UserId)
@@ -274,7 +274,7 @@ namespace Services
                     user.UserName = update.Email; // Assuming UserName is same as Email
                 }
                 //check On Phone Number Change
-                if (!string.Equals(user.PhoneNumber, update.PhoneNumber, StringComparison.OrdinalIgnoreCase))
+                if (!string.Equals(user.PhoneNumber, update.PhoneNumber, StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(update.PhoneNumber))
                 {
                     if (!Regex.IsMatch(update.PhoneNumber!, @"^(010|011|012|015)[0-9]{8}$"))
                         throw new BadRequestException($"Phone Number :{update.PhoneNumber} is Invalid");
@@ -292,8 +292,8 @@ namespace Services
                 user.DateOfBirth = update.DateOfBirth ?? user.DateOfBirth;
                 user.HiringDate = update.HiringDate ?? user.HiringDate;
                 user.Specialization = update.Specialization ?? user.Specialization;
-                user.Status = update.Status.ToString() ?? user.Status;
-                user.Gender =update.Gender.ToString()?? user.Gender;
+                user.Status = update.Status?.ToString() ?? user.Status;
+                user.Gender = update.Gender?.ToString() ?? user.Gender;
                 user.UpdatedAt = DateTime.UtcNow;
 
                 #endregion
