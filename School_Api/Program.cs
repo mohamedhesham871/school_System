@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using School_Api.ErrorHnadlingMidlleware;
 using StackExchange.Redis;
 using Microsoft.Identity.Client;
+using Serilog;
 
 namespace School_Api
 {
@@ -32,9 +33,14 @@ namespace School_Api
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-           
 
-            
+            //Add Serilog in my project to Track Loging
+            builder.Host.UseSerilog((HostBuilderContext Context, IServiceProvider service, LoggerConfiguration loggerConfiguration) =>
+            loggerConfiguration
+            .ReadFrom.Configuration(Context.Configuration)
+            .ReadFrom.Services(service)
+            );
+
             #region Register Repositories
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IDbInitializer, DbInitializer>();
