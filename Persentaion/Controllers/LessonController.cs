@@ -17,12 +17,13 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class LessonController(ILessonServices Services):ControllerBase
     {
         //Create New Lesson
-        [HttpPost]
+        [HttpPost("{subjectCode}")]
         [Authorize(Roles ="Teacher")]
-        public async Task<IActionResult> AddLesson([FromQuery] string subjectCode, [FromForm] CreateLessonDto createLessonDto)
+        public async Task<IActionResult> AddLesson([FromRoute] string subjectCode, [FromForm] CreateLessonDto createLessonDto)
         {
             if(ModelState.IsValid == false)
             {
@@ -35,13 +36,14 @@ namespace Presentation.Controllers
         
         
         //UpladFile
-        [HttpPost("UpladFile")]
+        [HttpPost("UpladFile/{lessonCode}")]
         [Authorize(Roles = "Teacher")]
-        public async Task<IActionResult> UploadLessonFile(string LessonCode, UploadFileDto uploadFile)
+        public async Task<IActionResult> UploadLessonFile([FromRoute]string lessonCode, [FromForm]UploadFileDto uploadFile)
         {
             if (ModelState.IsValid)
             {
-                var res = await Services.UploadFile(LessonCode, uploadFile);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var res = await Services.UploadFile(lessonCode, uploadFile, userId);
                 return Ok(res);
             }
             else
@@ -50,51 +52,52 @@ namespace Presentation.Controllers
         
         
         //Delete Lesson using Id Of lesson
-        [HttpDelete("{LessonCode}")]
+        [HttpDelete("{lessonCode}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> DeleteLesson(string lessonCode)
+        public async Task<IActionResult> DeleteLesson([FromRoute]string lessonCode)
         {
-            var result = await Services.DeleteLesson(lessonCode);
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var result = await Services.DeleteLesson(lessonCode, email);
             return Ok(result);
         }
 
 
         //Delete File of Lesson
-        [HttpDelete("DeleteFile/{LessonCode}")]
+        [HttpDelete("DeleteFile/{lessonCode}")]
         [Authorize(Roles = "Teacher")]
         public async Task<IActionResult> DeleteFile([FromRoute]string lessonCode)
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var result = await Services.DeleteFile(lessonCode, email);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await Services.DeleteFile(lessonCode, userId!);
             return Ok(result);
         }
 
         //Update Lesson Data
         [HttpPut("{lessonCode}")]
         [Authorize(Roles ="Teacher")]
-        public async Task<IActionResult> UpdateLesson( string lessonCode, [FromForm] UpdateLessonDto updateLessonDto)
+        public async Task<IActionResult> UpdateLesson([FromRoute] string lessonCode, [FromForm] UpdateLessonDto updateLessonDto)
         { 
             if (ModelState.IsValid == false)
             {
                 return BadRequest(ModelState);
             }
-            var email= User.FindFirstValue(ClaimTypes.Email);
-            var result = await Services.UpdateLesson(lessonCode, updateLessonDto,email);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await Services.UpdateLesson(lessonCode, updateLessonDto,userId!);
             return Ok(result);
         }
 
         //GEt Lesson By Code 
         [HttpGet("{lessonCode}")]
-        public async Task<IActionResult> GetLessonByCode(string lessonCode)
+        public async Task<IActionResult> GetLessonByCode([FromRoute]string lessonCode)
         {
 
             var result = await Services.GetLessonByCode(lessonCode);
             return Ok(result);
         }
         //For Every One
-        [HttpGet("GetAllLessonsInSubject")]
+        [HttpGet("{subjectCode}/GetLessonsInSubject")]
         [Authorize]
-        public async Task<IActionResult> GetAllLessonOfSubject(string subjectcode,[FromQuery]Subject_LessonFilteration filter)
+        public async Task<IActionResult> GetAllLessonOfSubject([FromRoute]string subjectcode,[FromQuery]Subject_LessonFilteration filter)
         {
 
             var email = User.FindFirstValue(ClaimTypes.Email);

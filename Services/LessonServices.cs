@@ -25,7 +25,7 @@ namespace Services
     public class LessonServices(IUnitOfWork unitOfWork,ILogger<LessonServices>_logger,IMapper _mapper,UserManager<AppUsers> userManager ) : ILessonServices
     {
         //Create New Lesson
-        public async Task<string> AddLesson(string subjectCode, CreateLessonDto createLessonDto,string email)
+        public async Task<GenericResponseDto> AddLesson(string subjectCode, CreateLessonDto createLessonDto,string email)
         {
             try
             {
@@ -40,7 +40,7 @@ namespace Services
                 if (subject is null) throw new NotFoundException($"Subject is Not Found Please Try Valid Subject");
                 
                 var Teacher = await userManager.FindByEmailAsync(email);
-                if (subject.TeacherId != Teacher.Id) throw new UnauthorizedAccessException("Teacher UnAuthorize Access to Add in this Subject");
+                if (subject.TeacherId != Teacher?.Id) throw new UnauthorizedAccessException("Teacher UnAuthorize Access to Add in this Subject");
 
                 var lesson = new Lesson()
                 {
@@ -52,65 +52,77 @@ namespace Services
                 };
                 unitOfWork.GetRepository<Lesson, int>().AddAsync(lesson);
                 var result = await unitOfWork.SaveChanges();
-                if(result>0){
-                    return "Lesson Added Successfully";
+                if (result > 0)
+                {
+                    _logger.LogInformation("User {Email} added a new lesson {LessonTitle} to subject {SubjectName} at {Time}", email, createLessonDto.Title, subject.SubjectName, DateTime.UtcNow.ToLocalTime());
+                    return new GenericResponseDto() { IsSuccess = true, Message = "Lesson Added Successfully" };
                 }
                 else throw new DatabaseException("Error in Adding Lesson");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in Adding Lesson");
-                throw;
+                return  new GenericResponseDto() { IsSuccess = false, Message = ex.Message };
             }
 
         }
 
         //Delete Lesson
-        public async Task<string> DeleteLesson(string lessonCode)
+        public async Task<GenericResponseDto> DeleteLesson(string lessonCode,string email)
         {
-            //check on Lesson if Exist
-
-            var Lesson=await  unitOfWork.GetRepository<Lesson,int>().GetEntityWithCode<Lesson>(lessonCode);
-            if (Lesson is null) throw new NotFoundException("Lesson Not Found Please Try Valid");
-
-            //Delete Lesson
-            unitOfWork.GetRepository<Lesson, int>().DeleteAsync(Lesson);
-            var result = await unitOfWork.SaveChanges();
-            if (result > 0)
+            try
             {
-                return "Lesson Deleted Successfully";
+                //check on Lesson exist
+                var Lesson = await unitOfWork.GetRepository<Lesson, int>().GetEntityWithCode<Lesson>(lessonCode);
+
+                if (Lesson is null) throw new NotFoundException("Lesson Not Found Please Try Valid");
+
+                //Delete Lesson
+                unitOfWork.GetRepository<Lesson, int>().DeleteAsync(Lesson);
+                var result = await unitOfWork.SaveChanges();
+                if (result > 0)
+                {
+                    _logger.LogInformation("Admin email :{email} Delete lesson {LessonCode}  at {Time}", email, lessonCode,  DateTime.UtcNow.ToLocalTime());
+
+                    return new GenericResponseDto() { IsSuccess = true, Message = "Deleting Lesson Successfully ..!" };
+                }
+                else throw new DatabaseException("Error in Deleting Lesson");
+
             }
-            else throw new DatabaseException("Error in Deleting Lesson");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Deleting Lesson");
+                return new GenericResponseDto() { IsSuccess = false, Message = ex.Message };
+            }
+
 
         }
    
         //Update Lesson
-        public async Task<string> UpdateLesson(string lessonCode, UpdateLessonDto updateLessonDto,string email)
+        public async Task<GenericResponseDto> UpdateLesson(string lessonCode, UpdateLessonDto updateLessonDto,string userId)
         {
             try
             {
                 // input validation
-                if (string.IsNullOrWhiteSpace(lessonCode)||string.IsNullOrEmpty(email))
+                if (string.IsNullOrWhiteSpace(lessonCode)||string.IsNullOrEmpty(userId))
                     throw new NullRefrenceException($"Lesson code Or Email cannot be null or empty {nameof(lessonCode)}");
 
-                if (updateLessonDto is null)
-                    throw new NullRefrenceException("updateLessonDto is Empty");
-                
-               //We want to check if Teacher Have Auth to update this Lesson
-                //1- Get Teacher Using email
+                //We want to check if Teacher Have Auth to update this Lesson
+                //1- Get Teacher 
                 //2- Get Lesson Using lessonCode [check if Lesson Exist]
                 //3- Get Subjet using Subject ID and then Compare Subject Teacher id with Teacher Who try to Update
-                
-                //Get Teacher 
-                var teacher = await userManager.FindByEmailAsync(email);
-                
+
+                //Get Teacher [Already we have Teacher Id form Token ]
+
+
                 //check on Lesson if Exist
-                var lesson = await unitOfWork.GetRepository<Lesson, int>().GetEntityWithCode<Lesson>(lessonCode);
+                var Spec = new LessonWithSubjectSpec(lessonCode);
+                var lesson = await unitOfWork.GetRepository<Lesson, int>().GetBySpecific(Spec);
                 if (lesson is null) throw new NotFoundException("Lesson Not Found Please Try Valid");
+
                
                 //Get Subject using Id
-                var subject = await unitOfWork.GetRepository<Subject, int>().GetByIdAsync(lesson.SubjectId);
-                if (teacher.Id != subject.TeacherId) throw new UnauthorizedAccessException("Teacher UnAuthorize to make upadate to this Lesson ");
+                if (userId != lesson.Subject.TeacherId) throw new UnauthorizedAccessException("Teacher UnAuthorize to make upadate to this Lesson ");
                 
                 //map the dto to the entity & then  update data
              
@@ -126,94 +138,119 @@ namespace Services
                 var result = await unitOfWork.SaveChanges();
                 if (result > 0)
                 {
-                    return "Lesson Updated Successfully";
+                    _logger.LogInformation("User {userId} updated lesson {LessonCode} at {Time}", userId, lessonCode, DateTime.UtcNow.ToLocalTime());
+                    
+                    return new GenericResponseDto() { IsSuccess = true, Message = "Lesson Updated Successfully" };
                 }
                 else throw new DatabaseException("Error in Updating Lesson");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in Updating Lesson");
-                throw;
+                return new GenericResponseDto() { IsSuccess = false, Message = ex.Message };
             }
         }
 
         //Upload File 
-        public async Task<string> UploadFile(string LeesonCode ,UploadFileDto fileDto)
+        public async Task<GenericResponseDto> UploadFile(string lessonCode, UploadFileDto fileDto ,string userId)
         {
-
-            //Check if Lesson is Exist 
-            var Lesson = await unitOfWork.GetRepository<Lesson, int>().GetEntityWithCode<Lesson>(LeesonCode);
-            if (Lesson is null) throw new NotFoundException("Lesson Not Found Please Try Valid");
-            if (Lesson.MaterialUrl is not null)
-                throw new BadRequestException("Can't Upload File you Already have One ,Delete File to Upload New");
-          
-            //if MatrialUrl is not null check if its valid url
-            var LessonFinalFile = string.Empty;
-            if (fileDto.Matrial is not null)
+            try
             {
+                //Check if Lesson is Exist 
+                
+                var spec= new LessonWithSubjectSpec(lessonCode);
+                var Lesson = await unitOfWork.GetRepository<Lesson, int>().GetBySpecific(spec);
 
-                //1- check on Extension
-                var Extention = Path.GetExtension(fileDto.Matrial.FileName).ToLowerInvariant();
-                if (Extention != ".pdf" && Extention != ".docx" && Extention != ".pptx" && Extention != ".mp4")
-                {
-                    throw new InvalidOperationException("Invalid File Extension. Only PDF, DOCX, PPTX, and MP4 are allowed.");
-                }
-                //2- check on MIME type
-                var LessonFileType = fileDto.Matrial.ContentType;
-                if (LessonFileType != "application/pdf" &&   // PDF
-                    LessonFileType != "application/vnd.openxmlformats-officedocument.wordprocessingml.document" && // DOCX
-                    LessonFileType != "application/vnd.openxmlformats-officedocument.presentationml.presentation" && // PPTX
-                    LessonFileType != "video/mp4")// MP4
-                {
-                    throw new InvalidOperationException("Invalid File Type. Only PDF, DOCX, PPTX, and MP4 are allowed.");
-                }
-                //3- save file to server
-                var UploadFile = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/FolderFile/Lessons");
-                var fileName = $"{Guid.NewGuid()}_{fileDto.Matrial.FileName}";
-                var filePath = Path.Combine(UploadFile, fileName);
+                if (Lesson is null) throw new NotFoundException("Lesson Not Found Please Try Valid");
 
-                using (var Stream = new FileStream(filePath, FileMode.Create))
+                if (Lesson.Subject.TeacherId != userId) throw new UnauthorizedAccessException("Teacher UnAuthorize to Access to this Function");
+              
+                if (Lesson.MaterialUrl is not null)
+                    throw new BadRequestException("Can't Upload File you Already have One ,Delete File to Upload New");
+
+                //if MatrialUrl is not null check if its valid url
+                var LessonFinalFile = string.Empty;
+                if (fileDto.Matrial is not null)
                 {
-                    await fileDto.Matrial.CopyToAsync(Stream);
+                    //1- check on Extension
+                    var Extention = Path.GetExtension(fileDto.Matrial.FileName).ToLowerInvariant();
+                    if (Extention != ".pdf" && Extention != ".docx" && Extention != ".pptx" && Extention != ".mp4")
+                    {
+                        throw new InvalidOperationException("Invalid File Extension. Only PDF, DOCX, PPTX, and MP4 are allowed.");
+                    }
+                    //2- check on MIME type
+                    var LessonFileType = fileDto.Matrial.ContentType;
+                    if (LessonFileType != "application/pdf" &&   // PDF
+                        LessonFileType != "application/vnd.openxmlformats-officedocument.wordprocessingml.document" && // DOCX
+                        LessonFileType != "application/vnd.openxmlformats-officedocument.presentationml.presentation" && // PPTX
+                        LessonFileType != "video/mp4")// MP4
+                    {
+                        throw new InvalidOperationException("Invalid File Type. Only PDF, DOCX, PPTX, and MP4 are allowed.");
+                    }
+                    //3- save file to server
+                    var UploadFile = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/FolderFile/Lessons");
+                    var fileName = $"{Guid.NewGuid()}_{fileDto.Matrial.FileName}";
+                    var filePath = Path.Combine(UploadFile, fileName);
+
+                    using (var Stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await fileDto.Matrial.CopyToAsync(Stream);
+                    }
+                    LessonFinalFile = $"/FolderFile/Lessons/{fileName}";
+                    //4- Save File Path to Database
+                    Lesson.MaterialUrl = LessonFinalFile;
+                   
                 }
-                LessonFinalFile = $"/FolderFile/Lessons/{fileName}";
-                //4- Save File Path to Database
-                Lesson.MaterialUrl = LessonFinalFile;
                 unitOfWork.GetRepository<Lesson, int>().UpdateAsync(Lesson);
-                var res= await  unitOfWork.SaveChanges();
-                if(res>0)
+                var res = await unitOfWork.SaveChanges();
+
+                if (res > 0)
                 {
-                    return "File Uploaded Successfully";
+                    _logger.LogInformation("User with Id {userId} File uploaded for lesson {LessonCode} at {Time}", userId,lessonCode, DateTime.UtcNow.ToLocalTime());
+                    return new GenericResponseDto() { IsSuccess = true, Message = "File Uploaded Successfully" };
                 }
-                else throw new DatabaseException("Error in Uploading File");
+                else
+                    throw new DatabaseException("Error in Uploading File");
             }
-
-    
-            throw  new BadRequestException("Error while Upload File ,Upload Valid File");
-
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Uploading File for lesson {LessonCode}", lessonCode);
+                return new GenericResponseDto() { IsSuccess = false, Message = ex.Message };
+            }
         }
        // Delete File
-        public async Task<string> DeleteFile(string LessonCode,string email)
+        public async Task<GenericResponseDto> DeleteFile(string LessonCode,string userId)
         {
-            if (LessonCode is null || email is null) throw new NullReferenceException("Lesson Or email is not Valid");
+            try
+            {
+                if (LessonCode is null ) throw new NullReferenceException("Lesson  is not Valid");
 
-            var teacher = await userManager.FindByEmailAsync(email);
-            if (teacher is null) throw new NotFoundException("Teacher is not Valid ,Please Enter Valid Teacher");
 
-            var lesson = await unitOfWork.GetRepository<Lesson, int>().GetEntityWithCode<Lesson>(LessonCode);
-            if (lesson is null) throw new NotFoundException("Not Found Lesson With that code to Delete");
+                var spec = new LessonWithSubjectSpec(LessonCode);
+                var lesson = await unitOfWork.GetRepository<Lesson, int>().GetBySpecific(spec);
+                if (lesson is null) throw new NotFoundException("Not Found Lesson With that code to Delete");
 
-            var subject = await unitOfWork.GetRepository<Subject, int>().GetByIdAsync(lesson.SubjectId);
 
-            if (subject.TeacherId != teacher.Id) throw new UnauthorizedAccessException("Teacher UnAuthorize to Access to this Function");
+                if (lesson.Subject.TeacherId != userId) throw new UnauthorizedAccessException("Teacher UnAuthorize to Access to this Function");
 
-            lesson.MaterialUrl = null;
-            unitOfWork.GetRepository<Lesson, int>().UpdateAsync(lesson);
-           var res=await  unitOfWork.SaveChanges();
-            if (res > 0)
-                return "Deleted File Successfully";
-            else
-                return "An Error While Delete File";
+                lesson.MaterialUrl = null;
+
+                unitOfWork.GetRepository<Lesson, int>().UpdateAsync(lesson);
+                var res = await unitOfWork.SaveChanges();
+                if (res > 0)
+                {
+                    _logger.LogInformation("User with Id :{userId} File deleted for lesson {LessonCode} at {Time}",userId, LessonCode, DateTime.UtcNow.ToLocalTime());
+                    
+                    return new GenericResponseDto() { IsSuccess = true, Message = "File Deleted Successfully" };
+                }
+                else
+                    throw new BadRequestException( "An Error While Delete File");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in Deleting File for lesson {LessonCode}", LessonCode);
+                return new GenericResponseDto() { IsSuccess = false, Message = ex.Message };
+            }
 
         }
 
